@@ -1,0 +1,40 @@
+networks:
+  party-map-net:
+    external: true
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER:-partymap} -d ${APP_DB_NAME:-partymap}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    networks:
+      - party-map-net
+      
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${APP_DB_NAME:-partymap}
+      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER:-partymap}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASS:-partymap}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/party-map
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - party-map-net
+
+volumes:
+  db:
