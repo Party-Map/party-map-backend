@@ -5,12 +5,10 @@ networks:
 services:
   db:
     image: postgres
-    environment:
-      POSTGRES_PASSWORD: password
     volumes:
       - db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER:-partymap} -d ${APP_DB_NAME:-partymap}"]
+      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER} -d ${APP_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,9 +22,9 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${APP_DB_NAME:-partymap}
-      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER:-partymap}
-      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASS:-partymap}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${APP_DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASS}
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/party-map
     depends_on:
       db:
