@@ -1,22 +1,19 @@
-networks:
-  party-map-net:
-    external: true
-
 services:
   db:
-    image: postgres
+    image: postgres:17-alpine
     volumes:
       - db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${APP_DB_PASS}
+      POSTGRES_USER: ${APP_DB_USER}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${APP_DB_USER} -d ${APP_DB_NAME}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: [ "CMD-SHELL", "pg_isready -U ${APP_DB_USER} -d ${APP_DB_NAME}" ]
+      start_period: 5s
     ports:
       - "5432:5432"
-    networks:
-      - party-map-net
-      
+#    networks:
+#      - party-map-net
+
   backend:
     build:
       context: .
@@ -31,8 +28,12 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-    networks:
-      - party-map-net
+#    networks:
+#      - party-map-net
 
 volumes:
   db:
+
+#networks:
+#  party-map-net:
+#    external: true

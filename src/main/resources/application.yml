@@ -1,12 +1,6 @@
 spring:
   application:
     name: PartyMapBackend
-  datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username: party-map
-    password: password
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: http://localhost:8081/realms/party-map
+  jpa:
+    hibernate:
+      ddl-auto: validate
