@@ -12,3 +12,12 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8081/realms/party-map
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: /dev
+      prefix: stdout
+      buffered: false
+      suffix:
+      file-date-format:

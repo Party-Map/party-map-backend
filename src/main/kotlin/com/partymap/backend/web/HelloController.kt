@@ -1,8 +1,9 @@
-package com.partymap.backend
+package com.partymap.backend.web
 
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
+import java.security.Principal
 
 @RestController
 class HelloController {
@@ -17,4 +18,13 @@ class HelloController {
 
     @GetMapping("/hello")
     fun hello(): Map<String, String> = mapOf("hello" to "world")
+
+    @GetMapping("/jwt-test")
+    fun jwtTest(principal: Principal?): Map<String, String> {
+        return if (principal != null) {
+            mapOf("sub" to principal.name)
+        } else {
+            mapOf("error" to "no principal")
+        }
+    }
 }
