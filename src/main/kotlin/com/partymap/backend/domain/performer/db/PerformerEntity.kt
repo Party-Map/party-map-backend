@@ -1,48 +1,34 @@
-package com.partymap.backend.domain.place.db
+package com.partymap.backend.domain.performer.db
 
 import com.partymap.backend.domain.common.db.BaseEntity
-import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.user.db.UserEntity
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "places")
-class PlaceEntity(
+@Table(name = "performers")
+class PerformerEntity(
 
     @Column(nullable = false)
     var name: String,
 
-    @Embedded
-    var location: GeoPointEmbeddable,
-
     @Column(nullable = false)
-    var address: String,
-
-    @Column(nullable = false)
-    var city: String,
+    var genre: String,
 
     @Column(columnDefinition = "text")
-    var description: String? = null,
+    var bio: String,
 
     @Column(nullable = true)
     var image: String? = null,
 
     @ElementCollection
     @CollectionTable(
-        name = "place_tags",
-        joinColumns = [JoinColumn(name = "place_id")]
-    )
-    @Column(name = "tag", nullable = false)
-    var tags: MutableSet<String> = mutableSetOf(),
-
-    @ElementCollection
-    @CollectionTable(
-        name = "place_links",
-        joinColumns = [JoinColumn(name = "place_id")]
+        name = "performer_links",
+        joinColumns = [JoinColumn(name = "performer_id")]
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
+    // owner
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     var owner: UserEntity,
