@@ -1,6 +1,8 @@
 package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.EventDto
+import com.partymap.backend.api.dtos.PerformerDto
+import com.partymap.backend.api.dtos.PlaceDto
 import com.partymap.backend.api.mappers.toDto
 import com.partymap.backend.domain.event.db.EventRepository
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,22 +18,19 @@ class EventController(
     private val eventRepository: EventRepository,
 ) {
 
+    // /events?placeId=<UUID>
+    // /events?performerId=<UUID>
     @GetMapping("/events")
     fun getEvents(
         @RequestParam(required = false) placeId: UUID?,
         @RequestParam(required = false) performerId: UUID?,
     ): List<EventDto> {
-        val all = eventRepository.findAll().map { it.toDto() }
-
-        val byPlace = placeId?.let { placeId ->
-            all.filter { it.placeId == placeId }
-        } ?: all
-
-        val byPerformer = performerId?.let { performerId ->
-            byPlace.filter { it.performerIds.contains(performerId) }
-        } ?: byPlace
-
-        return byPerformer
+        val events = when {
+            placeId != null -> eventRepository.findAllByPlace_Id(placeId)
+            performerId != null -> eventRepository.findAllByPerformers_Id(performerId)
+            else -> eventRepository.findAll()
+        }
+        return events.map { it.toDto() }
     }
 
     @GetMapping("/events/{id}")
@@ -39,4 +38,20 @@ class EventController(
         eventRepository.findById(id)
             .orElseThrow { NoSuchElementException("Event $id not found") }
             .toDto()
+
+    @GetMapping("/events/{id}/place")
+    fun getPlaceByEventId(@PathVariable id: UUID): PlaceDto {
+        val event = eventRepository.findById(id)
+            .orElseThrow { NoSuchElementException("Event $id not found") }
+
+        return event.place.toDto()
+    }
+
+    @GetMapping("/events/{id}/performers")
+    fun getPerformersByEventId(@PathVariable id: UUID): List<PerformerDto> {
+        val event = eventRepository.findById(id)
+            .orElseThrow { NoSuchElementException("Event $id not found") }
+
+        return event.performers.map { it.toDto() }
+    }
 }

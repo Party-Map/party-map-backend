@@ -2,6 +2,7 @@ package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.PlaceDto
 import com.partymap.backend.api.mappers.toDto
+import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

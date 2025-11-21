@@ -1,0 +1,19 @@
+### Get All events
+GET http://localhost:8080/api/events
+###
+
+### Get events by Placeid
+GET http://localhost:8080/api/events?placeId=43ce6e13-e30b-5b9f-8cc6-0aa52be7cf85
+###
+
+### Get events by performer
+GET http://localhost:8080/api/events?performerId=c1d21f9e-f293-5275-96db-242842b09ed3
+###
+
+### Get Place by Event
+GET http://localhost:8080/api/events/23c3c9fb-23e6-59d7-b317-dd614478e685/place
+###
+
+### Get Performers by Event
+GET http://localhost:8080/api/events/23c3c9fb-23e6-59d7-b317-dd614478e685/performers
+###
