@@ -1,8 +1,12 @@
 spring:
+  sql:
+    init:
+      mode: always
   jpa:
     hibernate:
       ddl-auto: create
     show-sql: true
+    defer-datasource-initialization: true
   datasource:
     url: jdbc:postgresql://localhost:5432/partymap
     username: partymap

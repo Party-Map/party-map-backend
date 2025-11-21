@@ -1,12 +1,17 @@
-package com.partymap.backend.web
+package com.partymap.backend.api.controllers
 
+import com.partymap.backend.api.dtos.UserDto
+import com.partymap.backend.api.mappers.toDto
+import com.partymap.backend.security.CurrentUserService
 import org.slf4j.LoggerFactory
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import java.security.Principal
 
 @RestController
-class HelloController {
+class HelloController(private val currentUserService: CurrentUserService) {
 
     val logger = LoggerFactory.getLogger(javaClass)
 
@@ -26,5 +31,11 @@ class HelloController {
         } else {
             mapOf("error" to "no principal")
         }
+    }
+
+    @GetMapping("/api/me")
+    fun me(@AuthenticationPrincipal jwt: Jwt): UserDto {
+        val user = currentUserService.getOrCreateUser(jwt)
+        return user.toDto()
     }
 }

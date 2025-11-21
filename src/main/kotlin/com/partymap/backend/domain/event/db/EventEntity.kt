@@ -22,10 +22,10 @@ class EventEntity(
     @Column(columnDefinition = "text")
     var description: String,
 
-    @Column(nullable = false)
+    @Column(name="start_time", nullable = false)
     var start: Instant,
 
-    @Column(nullable = false)
+    @Column(name="end_time", nullable = false)
     var end: Instant,
 
     @Column(nullable = true)
