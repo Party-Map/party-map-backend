@@ -3,6 +3,7 @@ package com.partymap.backend.domain.performer.db
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.user.db.UserEntity
+import com.partymap.backend.domain.tag.db.TagEntity
 import jakarta.persistence.*
 
 @Entity
@@ -11,9 +12,6 @@ class PerformerEntity(
 
     @Column(nullable = false)
     var name: String,
-
-    @Column(nullable = false)
-    var genre: String,
 
     @Column(columnDefinition = "text")
     var bio: String,
@@ -27,6 +25,18 @@ class PerformerEntity(
         joinColumns = [JoinColumn(name = "performer_id")]
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "genre_tag_id")
+    var genreTag: TagEntity? = null,
+
+    @ManyToMany
+    @JoinTable(
+        name = "performer_tags",
+        joinColumns = [JoinColumn(name = "performer_id")],
+        inverseJoinColumns = [JoinColumn(name = "tag_id")]
+    )
+    var tags: MutableSet<TagEntity> = mutableSetOf(),
 
     // owner
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

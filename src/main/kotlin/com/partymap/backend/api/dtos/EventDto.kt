@@ -1,6 +1,5 @@
 package com.partymap.backend.api.dtos
 
-import com.partymap.backend.domain.event.db.EventType
 import java.time.Instant
 import java.util.UUID
 
@@ -12,8 +11,9 @@ data class EventDto(
     val start: Instant,       // ISO-8601
     val end: Instant,
     val image: String?,
-    val performerIds: List<UUID>,
+    val performerIds: List<UUID>?,
     val price: String?,
-    val kind: EventType,
-    val links: List<LinkDto>,
+    val kindTag: TagDto,
+    val tags: List<TagDto>?,
+    val links: List<LinkDto>?,
 )

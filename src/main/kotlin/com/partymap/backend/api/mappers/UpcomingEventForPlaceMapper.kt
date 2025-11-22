@@ -12,6 +12,6 @@ fun EventEntity.toUpcomingEventDto(): UpcomingEventForPlaceDto {
         title = title,
         image = finalImage,
         start = this.start,
-        kind = this.kind,
+        kind = this.kindTag.toDto(),
     )
 }

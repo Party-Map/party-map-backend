@@ -10,6 +10,6 @@ data class PlaceDto(
     val city: String,
     val description: String?,
     val image: String?,
-    val tags: List<String>,
+    val tags: List<TagDto>?,
     val links: List<LinkDto>,
 )

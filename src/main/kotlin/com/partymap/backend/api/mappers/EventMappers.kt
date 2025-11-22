@@ -15,6 +15,7 @@ fun EventEntity.toDto(): EventDto =
         image = image,
         performerIds = performers.mapNotNull { it.id },
         price = price,
-        kind = kind,
+        kindTag = kindTag.toDto(),
+        tags = tags.map { it.toDto() },
         links = links.map { LinkDto(it.type, it.url) },
     )

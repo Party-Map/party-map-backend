@@ -18,6 +18,6 @@ fun PlaceEntity.toDto(): PlaceDto =
         city = city,
         description = description,
         image = image,
-        tags = tags.toList(),
+        tags = tags.map { it.toDto() },
         links = links.map { LinkDto(it.type, it.url) },
     )

@@ -8,8 +8,9 @@ fun PerformerEntity.toDto(): PerformerDto =
     PerformerDto(
         id = id!!,
         name = name,
-        genre = genre,
+        genreTag = genreTag?.toDto(),
         bio = bio,
         image = image,
+        tags = tags.map { it.toDto() },
         links = links.map { LinkDto(it.type, it.url) },
     )

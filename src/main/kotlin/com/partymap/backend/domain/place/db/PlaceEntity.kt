@@ -4,6 +4,7 @@ import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.user.db.UserEntity
+import com.partymap.backend.domain.tag.db.TagEntity
 import jakarta.persistence.*
 
 @Entity
@@ -28,13 +29,13 @@ class PlaceEntity(
     @Column(nullable = true)
     var image: String? = null,
 
-    @ElementCollection
-    @CollectionTable(
+    @ManyToMany
+    @JoinTable(
         name = "place_tags",
-        joinColumns = [JoinColumn(name = "place_id")]
+        joinColumns = [JoinColumn(name = "place_id")],
+        inverseJoinColumns = [JoinColumn(name = "tag_id")]
     )
-    @Column(name = "tag", nullable = false)
-    var tags: MutableSet<String> = mutableSetOf(),
+    var tags: MutableSet<TagEntity> = mutableSetOf(),
 
     @ElementCollection
     @CollectionTable(
