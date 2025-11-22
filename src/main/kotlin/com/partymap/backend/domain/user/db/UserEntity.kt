@@ -1,15 +1,25 @@
 package com.partymap.backend.domain.user.db
 
-import com.partymap.backend.domain.common.db.BaseEntity
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
-import java.util.UUID
+import jakarta.persistence.*
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.time.Instant
+import java.util.*
 
 @Entity
 @Table(name = "users")
+@EntityListeners(AuditingEntityListener::class)
 class UserEntity(
-
-    @Column(nullable = false, unique = true)
+    @Id
+    @Column(updatable = false)
     var sub: UUID,
-) : BaseEntity()
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    var createdDate: Instant? = null,
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    var updatedDate: Instant? = null,
+)

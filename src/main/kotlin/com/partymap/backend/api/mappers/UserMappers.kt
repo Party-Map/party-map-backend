@@ -4,6 +4,5 @@ import com.partymap.backend.api.dtos.UserDto
 import com.partymap.backend.domain.user.db.UserEntity
 
 fun UserEntity.toDto() = UserDto(
-    id = this.id,
     sub = this.sub,
 )

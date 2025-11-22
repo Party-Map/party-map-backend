@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.UUID
 
 interface PlaceRepository: JpaRepository<PlaceEntity, UUID> {
-    fun findAllByOwnerId(ownerId: UUID): List<PlaceEntity>
+    fun findAllByOwnerSub(ownerId: UUID): List<PlaceEntity>
 }
