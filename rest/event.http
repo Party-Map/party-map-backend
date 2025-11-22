@@ -1,6 +1,11 @@
 ### Get All events
 GET http://localhost:8080/api/events
-###
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
 
 ### Get events by Placeid
 GET http://localhost:8080/api/events?placeId=43ce6e13-e30b-5b9f-8cc6-0aa52be7cf85

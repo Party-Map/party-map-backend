@@ -1,6 +1,27 @@
 spring:
-  application:
-    name: PartyMapBackend
+  sql:
+    init:
+      mode: always
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
+    show-sql: true
+    defer-datasource-initialization: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/partymap
+    username: partymap
+    password: partymap
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/party-map
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      directory: /dev
+      prefix: stdout
+      buffered: false
+      suffix:
+      file-date-format:

@@ -3,13 +3,19 @@ package com.partymap.backend.api.controllers
 import com.partymap.backend.api.dtos.EventDto
 import com.partymap.backend.api.dtos.PerformerDto
 import com.partymap.backend.api.dtos.PlaceDto
+import com.partymap.backend.api.dtos.UpcomingEventForPlaceDto
 import com.partymap.backend.api.mappers.toDto
+import com.partymap.backend.api.mappers.toUpcomingEventDto
 import com.partymap.backend.domain.event.db.EventRepository
+import com.partymap.backend.domain.place.db.PlaceRepository
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
+import java.time.Instant
 import java.util.UUID
 
 @RestController
@@ -54,4 +60,5 @@ class EventController(
 
         return event.performers.map { it.toDto() }
     }
+
 }
