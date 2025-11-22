@@ -4,6 +4,7 @@ import com.partymap.backend.api.dtos.EventDto
 import com.partymap.backend.api.dtos.LinkDto
 import com.partymap.backend.api.dtos.SearchHitDto
 import com.partymap.backend.api.dtos.SearchHitType
+import com.partymap.backend.api.dtos.UpcomingEventForPlaceDto
 import com.partymap.backend.domain.event.db.EventEntity
 
 fun EventEntity.toDto(): EventDto =
@@ -20,6 +21,19 @@ fun EventEntity.toDto(): EventDto =
         kind = kind,
         links = links.map { LinkDto(it.type, it.url) },
     )
+
+fun EventEntity.toUpcomingEventDto(): UpcomingEventForPlaceDto {
+    val fallbackImage = this.place.image
+    val finalImage = this.image ?: fallbackImage
+
+    return UpcomingEventForPlaceDto(
+        id = id!!,
+        title = title,
+        image = finalImage,
+        start = this.start,
+        kind = this.kind,
+    )
+}
 
 fun EventEntity.toSearchHitDto(): SearchHitDto {
     val place = this.place
