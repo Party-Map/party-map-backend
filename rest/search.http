@@ -1,0 +1,119 @@
+### Get search hit for "Balaton"
+GET http://localhost:8080/api/search?q=Balaton
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Request returns the right number of hits", function () {
+        const len = jsonPath(response.body, "$.hits.length()");
+        client.assert(len === 5, "Expected 5 hits");
+    });
+
+    client.test("Contains an EVENT", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("EVENT"), "Expected an EVENT hit");
+    });
+
+    client.test("Contains a PERFORMER", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PERFORMER"), "Expected a PERFORMER hit");
+    });
+
+    client.test("Contains a PLACE", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PLACE"), "Expected a PLACE hit");
+    });
+%}
+
+### Get search hit for "Techno"
+GET http://localhost:8080/api/search?q=Techno
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Request returns the right number of hits", function () {
+        const len = jsonPath(response.body, "$.hits.length()");
+        client.assert(len === 7, "Expected 7 hits");
+    });
+
+    client.test("Contains an EVENT", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("EVENT"), "Expected an EVENT hit");
+    });
+
+    client.test("Contains a PERFORMER", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PERFORMER"), "Expected a PERFORMER hit");
+    });
+
+    client.test("Contains a PLACE", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PLACE"), "Expected a PLACE hit");
+    });
+%}
+
+### Get search hit for "B"
+GET http://localhost:8080/api/search?q=B
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Request returns the right number of hits", function () {
+        const len = jsonPath(response.body, "$.hits.length()");
+        client.assert(len === 25, "Expected 25 hits");
+    });
+
+    client.test("Contains an EVENT", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("EVENT"), "Expected an EVENT hit");
+    });
+
+    client.test("Contains a PERFORMER", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PERFORMER"), "Expected a PERFORMER hit");
+    });
+
+    client.test("Contains a PLACE", function () {
+        const types = jsonPath(response.body, "$.hits[*].type");
+        client.assert(types.includes("PLACE"), "Expected a PLACE hit");
+    });
+%}
+
+### Get search hit for ""
+GET http://localhost:8080/api/search?q=
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Request returns zero hits", function () {
+        const len = jsonPath(response.body, "$.hits.length()");
+        client.assert(len === 0, "Expected 0 hits");
+    });
+%}
+
+### Get search hit for "DROP DATABASE partymap;"
+GET http://localhost:8080/api/search?q=DROP%20DATABASE%20partymap%3B
+Accept: application/json
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+
+    client.test("Request returns zero hits, expected to not drop the database", function () {
+        const len = jsonPath(response.body, "$.hits.length()");
+        client.assert(len === 0, "Expected 0 hits");
+    });
+%}
