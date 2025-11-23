@@ -28,6 +28,9 @@ class PerformerEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
+    @ManyToMany(mappedBy = "likedPerformers")
+    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
+
     // owner
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)

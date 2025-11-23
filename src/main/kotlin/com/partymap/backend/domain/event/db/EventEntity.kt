@@ -53,6 +53,9 @@ class EventEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
+    @ManyToMany(mappedBy = "likedEvents")
+    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     var owner: UserEntity,

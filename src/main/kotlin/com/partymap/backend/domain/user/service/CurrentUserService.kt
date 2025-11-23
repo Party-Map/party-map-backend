@@ -1,10 +1,10 @@
-package com.partymap.backend.security
+package com.partymap.backend.domain.user.service
 
 import com.partymap.backend.domain.user.db.UserEntity
 import com.partymap.backend.domain.user.db.UserRepository
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class CurrentUserService(

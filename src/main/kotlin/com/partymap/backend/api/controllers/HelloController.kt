@@ -2,7 +2,7 @@ package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.UserDto
 import com.partymap.backend.api.mappers.toDto
-import com.partymap.backend.security.CurrentUserService
+import com.partymap.backend.domain.user.service.CurrentUserService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
