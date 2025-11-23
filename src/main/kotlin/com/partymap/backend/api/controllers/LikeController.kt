@@ -2,13 +2,13 @@ package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.LikeStatusDto
 import com.partymap.backend.domain.like.service.EventLikeService
-import com.partymap.backend.domain.like.service.PlaceLikeService
 import com.partymap.backend.domain.like.service.PerformerLikeService
+import com.partymap.backend.domain.like.service.PlaceLikeService
 import com.partymap.backend.domain.user.service.CurrentUserService
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/api/me/likes")
@@ -18,7 +18,6 @@ class LikeController(
     private val performerLikeService: PerformerLikeService,
     private val currentUserService: CurrentUserService,
 ) {
-
 
     @GetMapping("/events/{eventId}")
     fun isEventLiked(

@@ -4,8 +4,9 @@ import com.partymap.backend.domain.event.db.EventType
 import java.time.Instant
 import java.util.UUID
 
-data class UpcomingEventForPlaceDto (
-    val id: UUID?,
+data class PlaceUpcomingEventDto(
+    val placeId: UUID,
+    val eventId: UUID,
     val title: String,
     val image: String?,
     val start: Instant,

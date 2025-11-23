@@ -1,9 +1,9 @@
 package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.PlaceDto
-import com.partymap.backend.api.dtos.UpcomingEventForPlaceDto
+import com.partymap.backend.api.dtos.PlaceUpcomingEventDto
 import com.partymap.backend.api.mappers.toDto
-import com.partymap.backend.api.mappers.toUpcomingEventDto
+import com.partymap.backend.api.mappers.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import org.springframework.http.HttpStatus
@@ -33,19 +33,21 @@ class PlaceController(
             .toDto()
 
     @GetMapping("/places/{id}/upcoming-event")
-    fun getUcomingEventForPlace(@PathVariable id: UUID): UpcomingEventForPlaceDto {
+    fun getUpcomingEventForPlace(@PathVariable id: UUID): PlaceUpcomingEventDto {
         placeRepository.findById(id)
             .orElseThrow { NoSuchElementException("Place $id not found") }
 
-        val events =  eventRepository.findAllByPlace_Id(id)
-        if (events.isEmpty()) {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No upcoming event found for place $id")
-        }
+        val now = Instant.now()
 
-        val upcoming = events
-            .sortedBy { it.start }
-            .firstOrNull { it.end.isAfter(Instant.now()) }
-            ?: events.first()
-        return upcoming.toUpcomingEventDto()
+        val upcomingEvents = eventRepository
+            .findAllByPlace_IdAndEndAfterOrderByStartAsc(id, now)
+
+        val upcoming = upcomingEvents.minByOrNull { it.start }
+            ?: throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No upcoming event found for place $id",
+            )
+
+        return upcoming.toPlaceUpcomingEventDto()
     }
 }

@@ -3,13 +3,17 @@ package com.partymap.backend.api.controllers
 import com.partymap.backend.api.dtos.EventDto
 import com.partymap.backend.api.dtos.PerformerDto
 import com.partymap.backend.api.dtos.PlaceDto
+import com.partymap.backend.api.dtos.PlaceUpcomingEventDto
 import com.partymap.backend.api.mappers.toDto
+import com.partymap.backend.api.mappers.toPlaceUpcomingEventDto
+import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventRepository
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.Instant
 import java.util.UUID
 
 @RestController
@@ -53,6 +57,23 @@ class EventController(
             .orElseThrow { NoSuchElementException("Event $id not found") }
 
         return event.performers.map { it.toDto() }
+    }
+
+    @GetMapping("/events/upcoming-events")
+    fun getUpcomingEventsForAllPlaces(): List<PlaceUpcomingEventDto> {
+        val now = Instant.now()
+
+        val allUpcoming = eventRepository.findAllByEndAfterOrderByPlace_IdAscStartAsc(now)
+
+        val earliestPerPlace: List<EventEntity> =
+            allUpcoming
+                .groupBy { it.place.id!! }
+                .mapNotNull { (_, eventsForPlace) ->
+                    eventsForPlace.minByOrNull { it.start }
+                }
+
+        return earliestPerPlace
+            .map { it.toPlaceUpcomingEventDto() }
     }
 
 }
