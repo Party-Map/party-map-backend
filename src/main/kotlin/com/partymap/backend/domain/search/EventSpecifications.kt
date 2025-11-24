@@ -29,6 +29,7 @@ object EventSpecifications {
             val predicates = mutableListOf<jakarta.persistence.criteria.Predicate>()
 
             val titleExpr = root.get<String>("title")
+            val kindExpr = root.get<String>("kind")
             val descExpr = cb.coalesce(root.get("description"), "")
             val placeNameExpr = placeJoin.get<String>("name")
             val placeCityExpr = placeJoin.get<String>("city")
@@ -36,6 +37,7 @@ object EventSpecifications {
             val performerGenreExpr = performerJoin.get<String>("genre")
 
             predicates += SearchUtils.andKeywordsLike(cb, titleExpr, keywords)
+            predicates += SearchUtils.andKeywordsLike(cb, kindExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, descExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, placeNameExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, placeCityExpr, keywords)
