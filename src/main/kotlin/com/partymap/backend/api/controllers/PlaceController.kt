@@ -5,10 +5,15 @@ import com.partymap.backend.api.dtos.PlaceUpcomingEventDto
 import com.partymap.backend.api.mappers.toDto
 import com.partymap.backend.api.mappers.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.event.db.EventRepository
+import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.place.db.PlaceRepository
+import com.partymap.backend.domain.user.service.CurrentUserService
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
@@ -20,6 +25,8 @@ import java.util.UUID
 class PlaceController(
     private val placeRepository: PlaceRepository,
     private val eventRepository: EventRepository,
+    private val currentUserService: CurrentUserService,
+    private val userLikesFetchService: UserLikesFetchService,
 ) {
     @GetMapping("/places")
     fun getPlaces(): List<PlaceDto> =
@@ -49,5 +56,12 @@ class PlaceController(
             )
 
         return upcoming.toPlaceUpcomingEventDto()
+    }
+    @GetMapping("/places/liked-places")
+    fun getLikedPlacesForUser(
+        @AuthenticationPrincipal jwt: Jwt,
+    ): List<PlaceDto> {
+        val user = currentUserService.getOrCreateUser(jwt)
+        return userLikesFetchService.getLikedPlaces(user.sub)
     }
 }

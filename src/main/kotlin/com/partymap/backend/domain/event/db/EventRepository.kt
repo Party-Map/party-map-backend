@@ -18,4 +18,6 @@ interface EventRepository: JpaRepository<EventEntity, UUID>, JpaSpecificationExe
     fun findAllByEndAfterOrderByPlace_IdAscStartAsc(
         endAfter: Instant,
     ): List<EventEntity>
+
+    fun findAllByLikedByUsers_Sub(sub: UUID): List<EventEntity>
 }

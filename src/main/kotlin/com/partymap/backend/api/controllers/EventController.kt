@@ -1,6 +1,7 @@
 package com.partymap.backend.api.controllers
 
 import com.partymap.backend.api.dtos.EventDto
+import com.partymap.backend.api.dtos.LikedEventsGroupedDto
 import com.partymap.backend.api.dtos.PerformerDto
 import com.partymap.backend.api.dtos.PlaceDto
 import com.partymap.backend.api.dtos.PlaceUpcomingEventDto
@@ -8,6 +9,10 @@ import com.partymap.backend.api.mappers.toDto
 import com.partymap.backend.api.mappers.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventRepository
+import com.partymap.backend.domain.like.service.UserLikesFetchService
+import com.partymap.backend.domain.user.service.CurrentUserService
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,6 +25,8 @@ import java.util.UUID
 @RequestMapping("/api")
 class EventController(
     private val eventRepository: EventRepository,
+    private val currentUserService: CurrentUserService,
+    private val userLikesFetchService: UserLikesFetchService,
 ) {
 
     // /events?placeId=<UUID>
@@ -74,6 +81,14 @@ class EventController(
 
         return earliestPerPlace
             .map { it.toPlaceUpcomingEventDto() }
+    }
+
+    @GetMapping("/events/liked-events")
+    fun getLikedEventsForUser(
+        @AuthenticationPrincipal jwt: Jwt
+    ): LikedEventsGroupedDto {
+        val user = currentUserService.getOrCreateUser(jwt)
+        return userLikesFetchService.getLikedEventsGrouped(user.sub)
     }
 
 }
