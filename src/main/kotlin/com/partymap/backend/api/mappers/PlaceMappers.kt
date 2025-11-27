@@ -72,7 +72,7 @@ fun PlaceCreateDto.toEntity(owner: UserEntity): PlaceEntity =
 
 fun PlaceEntity.toAdminListItemDto(): PlaceAdminListItemDto =
     PlaceAdminListItemDto(
-        id = this.id!!,        // from BaseEntity
+        id = this.id!!,
         name = this.name,
         address = this.address,
         city = this.city,
