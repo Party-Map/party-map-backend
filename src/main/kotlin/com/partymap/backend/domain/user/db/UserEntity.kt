@@ -11,7 +11,6 @@ import java.time.Instant
 import java.util.*
 
 @Entity
-@Table(name = "users")
 @EntityListeners(AuditingEntityListener::class)
 class UserEntity(
     @Id
@@ -19,11 +18,11 @@ class UserEntity(
     var sub: UUID,
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     var createdDate: Instant? = null,
 
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     var updatedDate: Instant? = null,
 
     @ManyToMany

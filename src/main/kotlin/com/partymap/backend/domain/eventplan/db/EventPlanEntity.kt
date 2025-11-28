@@ -1,23 +1,18 @@
-package com.partymap.backend.domain.event.db
+package com.partymap.backend.domain.eventplan.db
 
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.place.db.PlaceEntity
+import com.partymap.backend.domain.event.db.EventType
 import com.partymap.backend.domain.user.db.UserEntity
 import jakarta.persistence.*
 import java.time.LocalTime
 
 @Entity
-class EventEntity(
-
-    @Column(nullable = false)
+class EventPlanEntity(
+    @Column
     var title: String,
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "place_id", nullable = false)
-    var place: PlaceEntity,
-
-    @Column(columnDefinition = "text")
+    @Column
     var description: String,
 
     @Column(name = "start_time", nullable = false)
@@ -36,14 +31,6 @@ class EventEntity(
     @Column(nullable = false)
     var kind: EventType,
 
-    @OneToMany(
-        mappedBy = "id.event",
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true,
-        fetch = FetchType.EAGER
-    )
-    var lineupItems: MutableSet<EventLineupItemEntity> = mutableSetOf(),
-
     @ElementCollection
     @CollectionTable(
         name = "event_links",
@@ -51,10 +38,11 @@ class EventEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
-    @ManyToMany(mappedBy = "likedEvents")
-    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
+    @OneToOne(cascade = [(CascadeType.ALL)])
+    var placeInvitation: EventPlanPlaceInvitationEntity,
+
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id", nullable = false)
     var owner: UserEntity,
-) : BaseEntity()
+
+    ) : BaseEntity()

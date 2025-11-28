@@ -8,7 +8,7 @@ import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import org.springframework.stereotype.Service
-import java.time.Instant
+import java.time.LocalTime
 import java.util.*
 
 @Service
@@ -20,7 +20,7 @@ class UserLikesFetchService(
     fun getLikedEventsGrouped(sub: UUID): LikedEventsGroupedDto {
         val events = eventRepository.findAllByLikedByUsers_Sub(sub)
 
-        val now = Instant.now()
+        val now = LocalTime.now()
 
         val upcoming = events
             .filter { it.end.isAfter(now) }

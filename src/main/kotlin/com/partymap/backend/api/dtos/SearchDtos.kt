@@ -1,6 +1,6 @@
 package com.partymap.backend.api.dtos
 
-import java.time.Instant
+import java.time.LocalTime
 import java.util.*
 
 enum class SearchHitType {
@@ -17,7 +17,7 @@ data class SearchHitDto(
     val subtitle: String,
     val image: String?,
 
-    val nextEventStart: Instant?,
+    val nextEventStart: LocalTime?,
 
     val placeId: UUID?,
 )

@@ -1,7 +1,6 @@
 package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.event.db.EventEntity
-import com.partymap.backend.domain.performer.db.PerformerEntity
 import com.partymap.backend.domain.place.db.PlaceEntity
 import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
@@ -24,7 +23,6 @@ object EventSpecifications {
             val futurePredicate = cb.greaterThan(root.get("end"), now)
 
             val placeJoin = root.join<EventEntity, PlaceEntity>("place", JoinType.LEFT)
-            val performerJoin = root.join<EventEntity, PerformerEntity>("performers", JoinType.LEFT)
 
             val predicates = mutableListOf<jakarta.persistence.criteria.Predicate>()
 
@@ -33,16 +31,12 @@ object EventSpecifications {
             val descExpr = cb.coalesce(root.get("description"), "")
             val placeNameExpr = placeJoin.get<String>("name")
             val placeCityExpr = placeJoin.get<String>("city")
-            val performerNameExpr = performerJoin.get<String>("name")
-            val performerGenreExpr = performerJoin.get<String>("genre")
 
             predicates += SearchUtils.andKeywordsLike(cb, titleExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, kindExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, descExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, placeNameExpr, keywords)
             predicates += SearchUtils.andKeywordsLike(cb, placeCityExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, performerNameExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, performerGenreExpr, keywords)
 
             val anyFieldMatches = cb.or(*predicates.toTypedArray())
 

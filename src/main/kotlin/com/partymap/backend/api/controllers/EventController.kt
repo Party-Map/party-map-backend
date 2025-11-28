@@ -7,13 +7,14 @@ import com.partymap.backend.api.mappers.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.like.service.UserLikesFetchService
+import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.user.service.CurrentUserService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
-import java.time.Instant
+import java.time.LocalTime
 import java.util.*
 
 @RestController
@@ -23,6 +24,7 @@ class EventController(
     private val currentUserService: CurrentUserService,
     private val userLikesFetchService: UserLikesFetchService,
     private val placeRepository: PlaceRepository,
+    private val performerRepository: PerformerRepository,
 ) {
 
     // /events?placeId=<UUID>
@@ -34,7 +36,10 @@ class EventController(
     ): List<EventDto> {
         val events = when {
             placeId != null -> eventRepository.findAllByPlace_Id(placeId)
-            performerId != null -> eventRepository.findAllByPerformers_Id(performerId)
+            performerId != null -> performerRepository.findById(performerId).map { performerEntity ->
+                performerEntity.lineupItems.map { it.id.event }
+            }.orElse(emptyList())
+
             else -> eventRepository.findAll()
         }
         return events.map { it.toDto() }
@@ -59,12 +64,12 @@ class EventController(
         val event = eventRepository.findById(id)
             .orElseThrow { NoSuchElementException("Event $id not found") }
 
-        return event.performers.map { it.toDto() }
+        return event.lineupItems.map { it.id.performer.toDto() }.distinct()
     }
 
     @GetMapping("/events/upcoming-events")
     fun getUpcomingEventsForAllPlaces(): List<PlaceUpcomingEventDto> {
-        val now = Instant.now()
+        val now = LocalTime.now()
 
         val allUpcoming = eventRepository.findAllByEndAfterOrderByPlace_IdAscStartAsc(now)
 

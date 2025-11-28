@@ -2,6 +2,7 @@ package com.partymap.backend.api.mappers
 
 import com.partymap.backend.api.dtos.*
 import com.partymap.backend.domain.event.db.EventEntity
+import com.partymap.backend.domain.event.db.EventLineupItemEntity
 
 fun EventEntity.toDto(): EventDto =
     EventDto(
@@ -12,7 +13,7 @@ fun EventEntity.toDto(): EventDto =
         start = start,
         end = end,
         image = image,
-        performerIds = performers.mapNotNull { it.id },
+        lineupItems = lineupItems.map { it.toDto() },
         price = price,
         kind = kind,
         links = links.map { LinkDto(it.type, it.url) },
@@ -62,4 +63,11 @@ fun EventEntity.toAdminListItemDto(): EventAdminListItemDto =
         start = start,
         end = end,
         placeName = place.name,
+    )
+
+fun EventLineupItemEntity.toDto(): EventLineupItemDto =
+    EventLineupItemDto(
+        startTime = startTime,
+        endTime = endTime,
+        performer = id.performer.toDto()
     )

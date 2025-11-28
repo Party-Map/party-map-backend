@@ -15,7 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.time.Instant
+import java.time.LocalTime
 import java.util.*
 
 @RestController
@@ -42,7 +42,7 @@ class PlaceController(
         placeRepository.findById(id)
             .orElseThrow { NoSuchElementException("Place $id not found") }
 
-        val now = Instant.now()
+        val now = LocalTime.now()
 
         val upcomingEvents = eventRepository
             .findAllByPlace_IdAndEndAfterOrderByStartAsc(id, now)

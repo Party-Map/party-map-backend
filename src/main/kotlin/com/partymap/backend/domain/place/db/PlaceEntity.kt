@@ -3,11 +3,11 @@ package com.partymap.backend.domain.place.db
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntity
 import com.partymap.backend.domain.user.db.UserEntity
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "places")
 class PlaceEntity(
 
     @Column(nullable = false)
@@ -33,7 +33,7 @@ class PlaceEntity(
         name = "place_tags",
         joinColumns = [JoinColumn(name = "place_id")]
     )
-    @Column(name = "tag", nullable = false)
+    @Column(nullable = false)
     var tags: MutableSet<String> = mutableSetOf(),
 
     @ElementCollection
@@ -43,10 +43,12 @@ class PlaceEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
-    @ManyToMany(mappedBy = "likedPlaces")
+    @ManyToMany
     var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
 
+    @OneToMany
+    var eventPlanInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf(),
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id", nullable = false)
     var owner: UserEntity,
 ) : BaseEntity()

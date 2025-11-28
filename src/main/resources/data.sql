@@ -1,13 +1,14 @@
 -- ------------------------------------------------------------------
--- Seed user (owner of all places / performers / events)
+-- Seed user (owner of all places / performers / events) -> user_entity
 -- ------------------------------------------------------------------
-INSERT INTO users (sub, created_at, updated_at)
+INSERT INTO public.user_entity (sub, created_date, updated_date)
 VALUES ('3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now());
 
 -- ------------------------------------------------------------------
--- Places
+-- Places -> place_entity
 -- ------------------------------------------------------------------
-INSERT INTO places (id, name, latitude, longitude, address, city, description, image, owner_id, created_at, updated_at)
+INSERT INTO public.place_entity (id, name, latitude, longitude, address, city, description, image, owner_sub,
+                                 created_at, updated_at)
 VALUES
     ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'Danube Club', 47.5005, 19.0481, 'Riverbank 12', 'Budapest', 'Riverside club with two dance floors and a rooftop terrace.', 'https://images.unsplash.com/photo-1667992403195-d2241a40ca2d?auto=format&fit=crop&w=1280&q=80', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
     ('d74d2042-627b-55fc-a36e-25cf5bebaf19', 'Ruin Bar 42', 47.4984, 19.0593, 'Kazinczy u. 14', 'Budapest', 'Iconic ruin-bar vibe with eclectic rooms and a courtyard.', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1280&auto=format&fit=crop', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
@@ -22,9 +23,9 @@ VALUES
     ('9f1532a9-8b89-5142-a386-147585e1ba33', 'Poldi Bácsi Sörözö', 47.4408014178659, 19.02280223577477, 'Ady Endre út 95', 'Budapest', 'Cozy local pub for socializing and late-night sessions.', 'https://images.unsplash.com/photo-1510626176961-4b57d4fbad03?auto=format&fit=crop&w=1280&q=80', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now());
 
 -- ------------------------------------------------------------------
--- Place tags
+-- Place tags -> place_tags (tags column)
 -- ------------------------------------------------------------------
-INSERT INTO place_tags (place_id, tag)
+INSERT INTO public.place_tags (place_id, tags)
 VALUES
     ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'house'),
     ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'techno'),
@@ -61,9 +62,9 @@ VALUES
     ('9f1532a9-8b89-5142-a386-147585e1ba33', 'pub');
 
 -- ------------------------------------------------------------------
--- Performers
+-- Performers -> performer_entity
 -- ------------------------------------------------------------------
-INSERT INTO performers (id, name, genre, bio, image, owner_id, created_at, updated_at)
+INSERT INTO public.performer_entity (id, name, genre, bio, image, owner_sub, created_at, updated_at)
 VALUES
     ('04238ef3-0e2b-528d-b141-ab202c578afc', 'DJ Aurora', 'Melodic Techno', 'Budapest-based DJ known for atmospheric sets and sunrise closers.', 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?q=80&w=1280&auto=format&fit=crop', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
     ('0d19069c-1a50-5cbc-8e32-ea7e162f9b4c', 'MC Lumen', 'Hip-Hop', 'High-energy MC bringing the party to life.', 'https://images.unsplash.com/photo-1506157786151-b8491531f063?q=80&w=1280&auto=format&fit=crop', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
@@ -72,16 +73,17 @@ VALUES
     ('363ed242-4068-5d2b-8750-ea2ece66d59d', 'Vibe Knights', 'Drum & Bass', 'Two-person DnB unit known for tight rollers.', 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1280&auto=format&fit=crop', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
     ('c1d21f9e-f293-5275-96db-242842b09ed3', 'Szeged Synth', 'Synthwave', 'Retro-futurist live act with neon-soaked arps.', 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1280&auto=format&fit=crop', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now());
 
--- Performer links (only DJ Aurora has links)
-INSERT INTO performer_links (performer_id, type, url)
+-- Performer links (same structure) -> performer_links
+INSERT INTO public.performer_links (performer_id, type, url)
 VALUES
     ('04238ef3-0e2b-528d-b141-ab202c578afc', 'INSTAGRAM', 'https://instagram.com/djaurora'),
     ('04238ef3-0e2b-528d-b141-ab202c578afc', 'WEBSITE', 'https://aurora.example.com');
 
 -- ------------------------------------------------------------------
--- Events
+-- Events -> event_entity
 -- ------------------------------------------------------------------
-INSERT INTO events (id, title, place_id, description, start_time, end_time, image, price, kind, owner_id, created_at, updated_at)
+INSERT INTO public.event_entity (id, title, place_id, description, start_time, end_time, image, price, kind, owner_id,
+                                 created_at, updated_at)
 VALUES
     ('23c3c9fb-23e6-59d7-b317-dd614478e685', 'Sunset Sessions', '6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'Open-air evening by the river with melodic vibes.', now() + interval '1 day', now() + interval '2 days', 'https://images.unsplash.com/photo-1540040582279-4d6cdf2d1b8b?q=80&w=1280&auto=format&fit=crop', '€15', 'DISCO', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
     ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', 'Basement Breaks', 'd74d2042-627b-55fc-a36e-25cf5bebaf19', 'Indie and alt mixes in the classic ruin bar setting.', now() + interval '3 days', now() + interval '3 days 4 hours', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1280&auto=format&fit=crop', 'Free', 'ALTER', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
@@ -98,16 +100,71 @@ VALUES
 
 -- ------------------------------------------------------------------
 -- Event ↔ Performer relations
+-- Old: event_performers(event_id, performer_id)
+-- New:
+--   event_lineup_item_entity(event_id, performer_id, start_time, end_time)
+--   performer_entity_lineup_items(lineup_items_event_id, lineup_items_performer_id, performer_entity_id)
+-- We seed with NULL times.
 -- ------------------------------------------------------------------
-INSERT INTO event_performers (event_id, performer_id)
+
+-- Basic lineup items WITH times
+INSERT INTO public.event_lineup_item_entity (event_id, performer_id, start_time, end_time)
 VALUES
-    ('23c3c9fb-23e6-59d7-b317-dd614478e685', '04238ef3-0e2b-528d-b141-ab202c578afc'), -- e1 -> a1
-    ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'), -- e2 -> a3
-    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '04238ef3-0e2b-528d-b141-ab202c578afc'), -- e3 -> a1
-    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c'), -- e3 -> a2
-    ('ee3a5589-54fc-50f2-a9b0-60056cf59478', '54b88841-f7cc-53fc-8595-a89b8b11aa1c'), -- e4 -> a4
-    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '04238ef3-0e2b-528d-b141-ab202c578afc'), -- e5 -> a1
-    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '54b88841-f7cc-53fc-8595-a89b8b11aa1c'), -- e5 -> a4
-    ('f04864d6-cad9-5161-89d4-ede7a25d1efa', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'), -- e6 -> a3
-    ('fa4860b4-daf2-5dc8-b7b6-dd769ea9c363', '363ed242-4068-5d2b-8750-ea2ece66d59d'), -- e7 -> a5
-    ('cd83795e-7909-5a5a-b60b-cd94cf20ae8c', 'c1d21f9e-f293-5275-96db-242842b09ed3'); -- e8 -> a6
+    -- Sunset Sessions: DJ Aurora (single)
+    ('23c3c9fb-23e6-59d7-b317-dd614478e685', '04238ef3-0e2b-528d-b141-ab202c578afc',
+     TIME '22:00', TIME '01:00'),
+
+    -- Basement Breaks: Klang Duo (single)
+    ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+     TIME '22:00', TIME '01:00'),
+
+    -- Warehouse All-Nighter: DJ Aurora + MC Lumen (two performers)
+    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '04238ef3-0e2b-528d-b141-ab202c578afc',
+     TIME '22:00', TIME '00:00'),
+    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c',
+     TIME '00:00', TIME '02:00'),
+
+    -- Shoreline Sunset: DJ Balcsi (single)
+    ('ee3a5589-54fc-50f2-a9b0-60056cf59478', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+     TIME '18:00', TIME '21:00'),
+
+    -- Pier Nights: DJ Aurora + DJ Balcsi (two performers)
+    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '04238ef3-0e2b-528d-b141-ab202c578afc',
+     TIME '21:00', TIME '23:00'),
+    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+     TIME '23:00', TIME '01:00'),
+
+    -- Waves Afterdark: Klang Duo (single)
+    ('f04864d6-cad9-5161-89d4-ede7a25d1efa', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+     TIME '22:00', TIME '02:00'),
+
+    -- Fehérvár Bassline: Vibe Knights (single)
+    ('fa4860b4-daf2-5dc8-b7b6-dd769ea9c363', '363ed242-4068-5d2b-8750-ea2ece66d59d',
+     TIME '22:00', TIME '01:00'),
+
+    -- Tisza Neon Ride: Szeged Synth (single)
+    ('cd83795e-7909-5a5a-b60b-cd94cf20ae8c', 'c1d21f9e-f293-5275-96db-242842b09ed3',
+     TIME '21:00', TIME '00:00');
+
+-- Mirror for performer_entity_lineup_items (unchanged)
+INSERT INTO public.performer_entity_lineup_items (lineup_items_event_id, lineup_items_performer_id, performer_entity_id)
+VALUES ('23c3c9fb-23e6-59d7-b317-dd614478e685', '04238ef3-0e2b-528d-b141-ab202c578afc',
+        '04238ef3-0e2b-528d-b141-ab202c578afc'),
+       ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+        '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'),
+       ('cd931a12-7697-588b-a6c4-603d2589f7aa', '04238ef3-0e2b-528d-b141-ab202c578afc',
+        '04238ef3-0e2b-528d-b141-ab202c578afc'),
+       ('cd931a12-7697-588b-a6c4-603d2589f7aa', '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c',
+        '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c'),
+       ('ee3a5589-54fc-50f2-a9b0-60056cf59478', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+        '54b88841-f7cc-53fc-8595-a89b8b11aa1c'),
+       ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '04238ef3-0e2b-528d-b141-ab202c578afc',
+        '04238ef3-0e2b-528d-b141-ab202c578afc'),
+       ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+        '54b88841-f7cc-53fc-8595-a89b8b11aa1c'),
+       ('f04864d6-cad9-5161-89d4-ede7a25d1efa', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+        '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'),
+       ('fa4860b4-daf2-5dc8-b7b6-dd769ea9c363', '363ed242-4068-5d2b-8750-ea2ece66d59d',
+        '363ed242-4068-5d2b-8750-ea2ece66d59d'),
+       ('cd83795e-7909-5a5a-b60b-cd94cf20ae8c', 'c1d21f9e-f293-5275-96db-242842b09ed3',
+        'c1d21f9e-f293-5275-96db-242842b09ed3');
