@@ -3,7 +3,7 @@ package com.partymap.backend.domain.eventplan.db
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.event.db.EventType
-import com.partymap.backend.domain.user.db.UserEntity
+import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.*
 import java.time.LocalTime
 

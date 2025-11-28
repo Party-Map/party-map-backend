@@ -1,10 +1,11 @@
 package com.partymap.backend.domain.search
 
-import com.partymap.backend.api.dtos.SearchResponseDto
-import com.partymap.backend.api.mappers.toSearchHitDto
 import com.partymap.backend.domain.event.db.EventRepository
+import com.partymap.backend.domain.event.toSearchHitDto
 import com.partymap.backend.domain.performer.db.PerformerRepository
+import com.partymap.backend.domain.performer.toSearchHitDto
 import com.partymap.backend.domain.place.db.PlaceRepository
+import com.partymap.backend.domain.place.toSearchHitDto
 import org.springframework.stereotype.Service
 
 @Service

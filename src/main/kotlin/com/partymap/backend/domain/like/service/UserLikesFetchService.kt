@@ -1,12 +1,14 @@
 package com.partymap.backend.domain.like.service
 
-import com.partymap.backend.api.dtos.LikedEventsGroupedDto
-import com.partymap.backend.api.dtos.PerformerDto
-import com.partymap.backend.api.dtos.PlaceDto
-import com.partymap.backend.api.mappers.toDto
 import com.partymap.backend.domain.event.db.EventRepository
+import com.partymap.backend.domain.event.toDto
+import com.partymap.backend.domain.like.dto.LikedEventsGroupedDto
 import com.partymap.backend.domain.performer.db.PerformerRepository
+import com.partymap.backend.domain.performer.dto.PerformerDto
+import com.partymap.backend.domain.performer.toDto
 import com.partymap.backend.domain.place.db.PlaceRepository
+import com.partymap.backend.domain.place.dto.PlaceDto
+import com.partymap.backend.domain.place.toDto
 import org.springframework.stereotype.Service
 import java.time.LocalTime
 import java.util.*

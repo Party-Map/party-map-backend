@@ -4,7 +4,7 @@ import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.event.db.EventLineupItemEntity
 import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationEntity
-import com.partymap.backend.domain.user.db.UserEntity
+import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.*
 
 @Entity
