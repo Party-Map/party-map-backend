@@ -1,10 +1,9 @@
 package com.partymap.backend.api.mappers
 
-import com.partymap.backend.api.dtos.LinkDto
-import com.partymap.backend.api.dtos.PerformerDto
-import com.partymap.backend.api.dtos.SearchHitDto
-import com.partymap.backend.api.dtos.SearchHitType
+import com.partymap.backend.api.dtos.*
+import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.performer.db.PerformerEntity
+import com.partymap.backend.domain.user.db.UserEntity
 
 fun PerformerEntity.toDto(): PerformerDto =
     PerformerDto(
@@ -26,4 +25,38 @@ fun PerformerEntity.toSearchHitDto(): SearchHitDto {
         nextEventStart = null,
         placeId = null,
     )
+}
+
+fun PerformerEntity.toAdminListItemDto(): PerformerAdminListItemDto =
+    PerformerAdminListItemDto(
+        id = this.id!!,
+        name = this.name,
+    )
+
+fun PerformerCreateDto.toEntity(owner: UserEntity): PerformerEntity =
+    PerformerEntity(
+        name = name,
+        genre = genre,
+        bio = bio,
+        image = image,
+        links = (links ?: emptyList()).map {
+            LinkEmbeddable(
+                type = it.type,
+                url = it.url,
+            )
+        }.toMutableList(),
+        owner = owner,
+    )
+
+fun PerformerEntity.updateFromDto(dto: PerformerCreateDto) {
+    name = dto.name
+    genre = genre
+    bio = bio
+    image = image
+    links = (dto.links ?: emptyList()).map {
+        LinkEmbeddable(
+            type = it.type,
+            url = it.url,
+        )
+    }.toMutableList()
 }

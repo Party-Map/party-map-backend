@@ -107,4 +107,22 @@ class PlaceController(
         return saved.toDto()
     }
 
+    @PreAuthorize("hasRole('place_manager_user')")
+    @DeleteMapping("/places/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deletePlace(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ) {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val place = placeRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
+
+        if (place.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this place")
+        }
+
+        placeRepository.deleteById(id)
+    }
 }

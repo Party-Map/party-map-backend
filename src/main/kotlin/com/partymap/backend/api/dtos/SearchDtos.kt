@@ -1,7 +1,7 @@
 package com.partymap.backend.api.dtos
 
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 enum class SearchHitType {
     PLACE,
@@ -21,6 +21,7 @@ data class SearchHitDto(
 
     val placeId: UUID?,
 )
+
 data class SearchResponseDto(
     val query: String,
     val hits: List<SearchHitDto>,

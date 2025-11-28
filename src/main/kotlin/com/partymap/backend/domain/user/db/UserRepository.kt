@@ -1,7 +1,6 @@
 package com.partymap.backend.domain.user.db
 
 import org.springframework.data.jpa.repository.JpaRepository
-import java.util.UUID
+import java.util.*
 
-interface UserRepository : JpaRepository<UserEntity, UUID> {
-}
+interface UserRepository : JpaRepository<UserEntity, UUID>

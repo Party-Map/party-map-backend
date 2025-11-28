@@ -5,7 +5,7 @@ import com.partymap.backend.domain.user.db.UserRepository
 import jakarta.transaction.Transactional
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class CurrentUserService(

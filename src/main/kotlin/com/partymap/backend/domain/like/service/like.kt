@@ -4,7 +4,7 @@ import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.user.db.UserEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 abstract class AbstractLikeService<E : BaseEntity>(
     private val entityRepository: JpaRepository<E, UUID>,

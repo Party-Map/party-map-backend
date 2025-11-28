@@ -2,10 +2,7 @@ package com.partymap.backend.api.dtos
 
 import java.util.*
 
-data class PlaceAdminListItemDto(
+data class PerformerAdminListItemDto(
     val id: UUID,
     val name: String,
-    val address: String,
-    val city: String,
 )
-

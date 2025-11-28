@@ -2,7 +2,7 @@ package com.partymap.backend.api.dtos
 
 import com.partymap.backend.domain.event.db.EventType
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 data class PlaceUpcomingEventDto(
     val placeId: UUID,

@@ -38,8 +38,9 @@ class SecurityConfig() {
 
     @Bean
     fun grantedAuthorityDefaults(): GrantedAuthorityDefaults {
-        return GrantedAuthorityDefaults("");
+        return GrantedAuthorityDefaults("")
     }
+
     // https://www.baeldung.com/spring-security-map-authorities-jwt
     @Bean
     fun jwtAuthenticationConverter(): Converter<Jwt?, out AbstractAuthenticationToken?> {

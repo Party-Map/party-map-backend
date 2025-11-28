@@ -1,13 +1,7 @@
 package com.partymap.backend.api.mappers
 
 
-import com.partymap.backend.api.dtos.GeoPointDto
-import com.partymap.backend.api.dtos.LinkDto
-import com.partymap.backend.api.dtos.PlaceAdminListItemDto
-import com.partymap.backend.api.dtos.PlaceCreateDto
-import com.partymap.backend.api.dtos.PlaceDto
-import com.partymap.backend.api.dtos.SearchHitDto
-import com.partymap.backend.api.dtos.SearchHitType
+import com.partymap.backend.api.dtos.*
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.place.db.PlaceEntity
@@ -48,6 +42,7 @@ fun PlaceEntity.toSearchHitDto(): SearchHitDto {
         placeId = this.id,
     )
 }
+
 fun GeoPointDto.toEmbeddable() =
     GeoPointEmbeddable(latitude = latitude, longitude = longitude)
 

@@ -1,8 +1,8 @@
 package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.event.db.EventEntity
-import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.performer.db.PerformerEntity
+import com.partymap.backend.domain.place.db.PlaceEntity
 import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
 import java.time.Instant

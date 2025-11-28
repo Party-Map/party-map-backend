@@ -1,10 +1,6 @@
 package com.partymap.backend.api.mappers
 
-import com.partymap.backend.api.dtos.EventDto
-import com.partymap.backend.api.dtos.LinkDto
-import com.partymap.backend.api.dtos.PlaceUpcomingEventDto
-import com.partymap.backend.api.dtos.SearchHitDto
-import com.partymap.backend.api.dtos.SearchHitType
+import com.partymap.backend.api.dtos.*
 import com.partymap.backend.domain.event.db.EventEntity
 
 fun EventEntity.toDto(): EventDto =
@@ -58,3 +54,12 @@ fun EventEntity.toSearchHitDto(): SearchHitDto {
         placeId = place.id,
     )
 }
+
+fun EventEntity.toAdminListItemDto(): EventAdminListItemDto =
+    EventAdminListItemDto(
+        id = id!!,
+        title = title,
+        start = start,
+        end = end,
+        placeName = place.name,
+    )

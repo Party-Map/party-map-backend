@@ -3,9 +3,9 @@ package com.partymap.backend.domain.event.db
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
-interface EventRepository: JpaRepository<EventEntity, UUID>, JpaSpecificationExecutor<EventEntity> {
+interface EventRepository : JpaRepository<EventEntity, UUID>, JpaSpecificationExecutor<EventEntity> {
     fun findAllByPlace_Id(placeId: UUID): List<EventEntity>
 
     fun findAllByPerformers_Id(performerId: UUID): List<EventEntity>
@@ -20,4 +20,6 @@ interface EventRepository: JpaRepository<EventEntity, UUID>, JpaSpecificationExe
     ): List<EventEntity>
 
     fun findAllByLikedByUsers_Sub(sub: UUID): List<EventEntity>
+
+    fun findAllByOwner_Sub(sub: UUID): List<EventEntity>
 }

@@ -9,7 +9,7 @@ import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import org.springframework.stereotype.Service
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @Service
 class UserLikesFetchService(

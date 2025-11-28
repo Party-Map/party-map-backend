@@ -1,29 +1,24 @@
 package com.partymap.backend.domain.common.db
 
-import jakarta.persistence.Column
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
-abstract class BaseEntity (
+abstract class BaseEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     var id: UUID? = null,
 
     @CreatedDate
-    @Column(name="created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     var createdDate: Instant? = null,
 
     @LastModifiedDate
-    @Column(name="updated_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     var updatedDate: Instant? = null,
 )

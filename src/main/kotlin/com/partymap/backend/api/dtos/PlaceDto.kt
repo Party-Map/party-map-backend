@@ -1,6 +1,6 @@
 package com.partymap.backend.api.dtos
 
-import java.util.UUID
+import java.util.*
 
 data class PlaceDto(
     val id: UUID,

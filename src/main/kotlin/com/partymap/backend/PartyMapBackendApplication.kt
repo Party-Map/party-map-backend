@@ -9,5 +9,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 class PartyMapBackendApplication
 
 fun main(args: Array<String>) {
-	runApplication<PartyMapBackendApplication>(*args)
+    runApplication<PartyMapBackendApplication>(*args)
 }
