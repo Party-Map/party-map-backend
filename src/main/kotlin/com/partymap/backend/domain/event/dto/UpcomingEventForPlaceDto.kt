@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.event.dto
 
 import com.partymap.backend.domain.event.db.EventType
-import java.time.LocalTime
+import java.time.LocalDateTime
 import java.util.*
 
 data class PlaceUpcomingEventDto(
@@ -9,6 +9,6 @@ data class PlaceUpcomingEventDto(
     val eventId: UUID,
     val title: String,
     val image: String?,
-    val start: LocalTime,
+    val start: LocalDateTime,
     val kind: EventType,
 )

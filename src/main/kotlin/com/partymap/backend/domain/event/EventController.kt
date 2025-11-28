@@ -18,7 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
-import java.time.LocalTime
+import java.time.LocalDateTime
 import java.util.*
 
 @RestController
@@ -73,7 +73,7 @@ class EventController(
 
     @GetMapping("/events/upcoming-events")
     fun getUpcomingEventsForAllPlaces(): List<PlaceUpcomingEventDto> {
-        val now = LocalTime.now()
+        val now = LocalDateTime.now()
 
         val allUpcoming = eventRepository.findAllByEndAfterOrderByPlace_IdAscStartAsc(now)
 

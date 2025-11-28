@@ -5,7 +5,7 @@ import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.*
-import java.time.LocalTime
+import java.time.LocalDateTime
 
 @Entity
 class EventEntity(
@@ -21,10 +21,10 @@ class EventEntity(
     var description: String,
 
     @Column(name = "start_time", nullable = false)
-    var start: LocalTime,
+    var start: LocalDateTime,
 
     @Column(name = "end_time", nullable = false)
-    var end: LocalTime,
+    var end: LocalDateTime,
 
     @Column(nullable = true)
     var image: String? = null,
