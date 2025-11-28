@@ -42,7 +42,7 @@ class EventEntity(
         orphanRemoval = true,
         fetch = FetchType.EAGER
     )
-    var lineupItems: MutableSet<EventLineupItemEntity> = mutableSetOf(),
+    var lineupItems: MutableList<EventLineupItemEntity> = mutableListOf(),
 
     @ElementCollection
     @CollectionTable(
@@ -52,7 +52,7 @@ class EventEntity(
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
     @ManyToMany(mappedBy = "likedEvents")
-    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
+    var likedByUsers: MutableList<UserEntity> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)

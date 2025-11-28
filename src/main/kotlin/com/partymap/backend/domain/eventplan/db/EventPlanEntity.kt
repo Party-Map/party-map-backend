@@ -5,7 +5,7 @@ import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.event.db.EventType
 import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.*
-import java.time.LocalTime
+import java.time.LocalDateTime
 
 @Entity
 class EventPlanEntity(
@@ -15,17 +15,17 @@ class EventPlanEntity(
     @Column
     var description: String,
 
-    @Column(name = "start_time", nullable = false)
-    var start: LocalTime,
+    @Column(nullable = false)
+    var startDateTime: LocalDateTime,
 
-    @Column(name = "end_time", nullable = false)
-    var end: LocalTime,
-
-    @Column(nullable = true)
-    var image: String? = null,
+    @Column(nullable = false)
+    var endDateTime: LocalDateTime,
 
     @Column(nullable = true)
-    var price: String? = null,
+    var image: String?,
+
+    @Column(nullable = true)
+    var price: String?,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,9 +38,12 @@ class EventPlanEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
-    @OneToOne(cascade = [(CascadeType.ALL)])
-    var placeInvitation: EventPlanPlaceInvitationEntity,
+    // Optional one-to-one relationship is not possible in JPA
+    @OneToMany(cascade = [(CascadeType.ALL)], fetch = FetchType.EAGER)
+    var placeInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf(),
 
+    @OneToMany
+    var lineupInvitations: MutableList<EventPlanLineupInvitationEntity> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     var owner: UserEntity,
