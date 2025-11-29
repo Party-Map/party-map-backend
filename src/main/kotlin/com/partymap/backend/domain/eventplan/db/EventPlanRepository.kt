@@ -6,4 +6,5 @@ import java.util.*
 interface EventPlanRepository : JpaRepository<EventPlanEntity, UUID> {
     fun findAllByOwner_Sub(sub: UUID): List<EventPlanEntity>
 
+    fun findByIdAndOwner_Sub(id: UUID, sub: UUID): Optional<EventPlanEntity>
 }

@@ -15,4 +15,6 @@ data class EventPlanDto(
     val price: String?,
     val kind: EventType,
     val links: List<LinkDto>,
+    val placeInvitation: EventPlanPlaceInvitationDto?,
+    val lineupInvitations: List<EventPlanLineupInvitationDto>,
 )

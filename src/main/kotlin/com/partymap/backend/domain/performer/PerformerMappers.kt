@@ -55,9 +55,9 @@ fun PerformerCreateDto.toEntity(owner: UserEntity): PerformerEntity =
 
 fun PerformerEntity.updateFromDto(dto: PerformerCreateDto) {
     name = dto.name
-    genre = genre
-    bio = bio
-    image = image
+    genre = dto.genre
+    bio = dto.bio
+    image = dto.image
     links = (dto.links ?: emptyList()).map {
         LinkEmbeddable(
             type = it.type,

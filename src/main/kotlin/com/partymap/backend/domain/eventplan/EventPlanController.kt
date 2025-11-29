@@ -21,19 +21,26 @@ import java.util.*
 class EventPlanController(
     private val placeRepository: PlaceRepository,
     private val currentUserService: CurrentUserService,
-    private val eventPlanRepository: EventPlanRepository
+    private val eventPlanRepository: EventPlanRepository,
+    private val eventPlanService: EventPlanService
 ) {
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/{id}")
-    fun getEvent(
+    fun getEventPlan(
         @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable id: UUID
+        @PathVariable id: UUID,
     ): EventPlanDto {
-        currentUserService.getOrCreateUser(jwt)
-        return eventPlanRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Event plan $id not found") }
-            .toDto()
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to view this event plan")
+        }
+
+        return eventPlan.toDto()
     }
 
     @PreAuthorize("hasRole('event_organizer_user')")
@@ -87,4 +94,26 @@ class EventPlanController(
         val saved = eventPlanRepository.save(eventPlan)
         return saved.toDto()
     }
+
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @PutMapping("/event-plan/{id}/invite-place/{placeId}")
+    fun invitePlaceForEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @PathVariable placeId: UUID,
+    ): HttpStatus {
+        currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found")
+        }
+
+        val place = placeRepository.findById(placeId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $placeId not found") }
+
+        eventPlanService.invitePlace(eventPlan, place)
+
+        return HttpStatus.OK
+    }
+
 }
