@@ -1,4 +1,4 @@
-package com.partymap.backend.domain.eventplan.db
+package com.partymap.backend.domain.eventplan.dto
 
 import java.time.LocalDateTime
 import java.util.*

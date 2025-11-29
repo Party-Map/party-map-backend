@@ -5,7 +5,7 @@ import com.partymap.backend.domain.event.dto.PlaceUpcomingEventDto
 import com.partymap.backend.domain.event.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntityRepository
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationWithDateDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationWithDateDto
 import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto

@@ -1,5 +1,6 @@
-package com.partymap.backend.domain.eventplan.db
+package com.partymap.backend.domain.eventplan.dto
 
+import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationState
 import com.partymap.backend.domain.performer.dto.PerformerDto
 import java.time.LocalTime
 

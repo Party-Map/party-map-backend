@@ -38,11 +38,10 @@ class EventPlanEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
-    // Optional one-to-one relationship is not possible in JPA
     @OneToMany(cascade = [(CascadeType.ALL)], fetch = FetchType.EAGER)
     var placeInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf(),
 
-    @OneToMany
+    @OneToMany(cascade = [(CascadeType.ALL)], fetch = FetchType.EAGER)
     var lineupInvitations: MutableList<EventPlanLineupInvitationEntity> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

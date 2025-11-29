@@ -1,6 +1,11 @@
 package com.partymap.backend.domain.eventplan
 
-import com.partymap.backend.domain.eventplan.db.*
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
+import com.partymap.backend.domain.eventplan.db.EventPlanRepository
+import com.partymap.backend.domain.eventplan.dto.*
+import com.partymap.backend.domain.eventplan.exception.AlreadyInvitedPerformerException
+import com.partymap.backend.domain.eventplan.exception.InvalidStartOrEndTimeException
+import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.toAdminListItemDto
@@ -20,7 +25,8 @@ class EventPlanController(
     private val placeRepository: PlaceRepository,
     private val currentUserService: CurrentUserService,
     private val eventPlanRepository: EventPlanRepository,
-    private val eventPlanService: EventPlanService
+    private val eventPlanService: EventPlanService,
+    private val performerRepository: PerformerRepository
 ) {
 
     @PreAuthorize("hasRole('event_organizer_user')")
@@ -157,6 +163,87 @@ class EventPlanController(
 
         eventPlanRepository.save(eventPlan)
 
+        return HttpStatus.OK
+    }
+
+
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @GetMapping("/event-plan/{id}/lineup-invitations")
+    @Transactional
+    fun getLineupInvitationsForEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ): List<EventPlanLineupInvitationDto> {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to view this event plan")
+        }
+
+        return eventPlan.lineupInvitations.map { it.toDto() }
+    }
+
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @PostMapping("/event-plan/{id}/add-lineup-invitation")
+    @Transactional
+    fun addLineupInvitationToEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @RequestBody dto: EventPlanLineupInvitationCreatePayloadDto,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this event plan")
+        }
+
+        val performer = performerRepository.findById(dto.performerId).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Performer ${dto.performerId} not found")
+        }
+
+        try {
+            eventPlanService.invitePerformer(eventPlan, performer, dto.startTime, dto.endTime)
+        } catch (e: AlreadyInvitedPerformerException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message!!)
+        } catch (e: InvalidStartOrEndTimeException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message!!)
+        }
+
+        return HttpStatus.OK
+    }
+
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @DeleteMapping("/event-plan/{id}/lineup-invitation/{performerId}")
+    @Transactional
+    fun deleteLineupInvitationToEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @PathVariable performerId: UUID,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this event plan")
+        }
+
+        val removed = eventPlan.lineupInvitations.removeIf { it.id.performer.id == performerId }
+        if (!removed) {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Lineup invitation for performer $performerId not found in event plan $id"
+            )
+        }
+
+        eventPlanRepository.save(eventPlan)
         return HttpStatus.OK
     }
 
