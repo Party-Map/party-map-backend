@@ -1,5 +1,10 @@
 package com.partymap.backend.domain.performer
 
+import com.partymap.backend.domain.eventplan.EventPlanService
+import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationState
+import com.partymap.backend.domain.eventplan.db.EventPlanRepository
+import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationForPerformerDto
+import com.partymap.backend.domain.eventplan.toForPerformerDto
 import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.performer.dto.PerformerAdminListItemDto
@@ -20,6 +25,8 @@ class PerformerController(
     private val performerRepository: PerformerRepository,
     private val currentUserService: CurrentUserService,
     private val userLikesFetchService: UserLikesFetchService,
+    private val eventPlanRepository: EventPlanRepository,
+    private val eventPlanService: EventPlanService,
 ) {
 
     @GetMapping("/performers")
@@ -82,5 +89,70 @@ class PerformerController(
 
         val saved = performerRepository.save(performer)
         return saved.toDto()
+    }
+
+    @PreAuthorize("hasRole('performer_manager_user')")
+    @GetMapping("/performers/{id}/invitations")
+    fun getInvitationsForPerformer(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ): List<EventPlanLineupInvitationForPerformerDto> {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val performer = performerRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Performer $id not found") }
+
+        if (performer.owner.sub != user.sub) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "You are not allowed to view invitations for this performer"
+            )
+        }
+
+        val eventPlans = eventPlanRepository.findAll()
+
+        return eventPlans.flatMap { eventPlan ->
+            eventPlan.lineupInvitations
+                .filter { it.id.performer.id == performer.id }
+                .map { it.toForPerformerDto() }
+        }
+    }
+
+    @PreAuthorize("hasRole('performer_manager_user')")
+    @PutMapping("/performers/{id}/invitations/{eventPlanId}/respond")
+    fun respondToInvitation(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @PathVariable eventPlanId: UUID,
+        @RequestParam state: String,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val performer = performerRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Performer $id not found") }
+
+        if (performer.owner.sub != user.sub) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "You are not allowed to respond to invitations for this performer"
+            )
+        }
+
+        val newState = when (state.lowercase()) {
+            "accept" -> EventPlanLineupInvitationState.ACCEPTED
+            "reject" -> EventPlanLineupInvitationState.REJECTED
+            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state: $state")
+        }
+
+        val eventPlan = eventPlanRepository.findById(eventPlanId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $eventPlanId not found") }
+
+        try {
+            eventPlanService.respondToPerformerInvitation(eventPlan, performer, newState)
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, e.message ?: "Invitation not found")
+        }
+
+        return HttpStatus.OK
     }
 }

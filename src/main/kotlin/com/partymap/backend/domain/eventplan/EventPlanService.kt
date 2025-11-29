@@ -116,4 +116,18 @@ class EventPlanService(
 
         eventPlanRepository.delete(eventPlan)
     }
+
+    @Transactional
+    fun respondToPerformerInvitation(
+        eventPlan: EventPlanEntity,
+        performer: PerformerEntity,
+        newState: EventPlanLineupInvitationState,
+    ) {
+        val invitation = eventPlan.lineupInvitations.firstOrNull { it.id.performer.id == performer.id }
+            ?: throw IllegalArgumentException("Lineup invitation for performer ${performer.id} not found in event plan ${eventPlan.id}")
+
+        invitation.state = newState
+
+        eventPlanRepository.save(eventPlan)
+    }
 }

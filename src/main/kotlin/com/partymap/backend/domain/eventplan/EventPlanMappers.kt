@@ -80,3 +80,14 @@ fun EventPlanLineupInvitationEntity.toDto(): EventPlanLineupInvitationDto =
         startTime = startTime,
         endTime = endTime,
     )
+
+fun EventPlanLineupInvitationEntity.toForPerformerDto(): EventPlanLineupInvitationForPerformerDto =
+    EventPlanLineupInvitationForPerformerDto(
+        eventPlanId = id.eventPlan.id!!,
+        eventPlanTitle = id.eventPlan.title,
+        state = state,
+        performer = id.performer.toDto(),
+        startTime = startTime,
+        endTime = endTime,
+    )
+
