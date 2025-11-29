@@ -3,7 +3,6 @@ package com.partymap.backend.domain.place.db
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntity
 import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.*
 
@@ -45,9 +44,6 @@ class PlaceEntity(
 
     @ManyToMany
     var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
-
-    @OneToMany
-    var eventPlanInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf(),
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     var owner: UserEntity,

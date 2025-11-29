@@ -3,12 +3,16 @@ package com.partymap.backend.domain.place
 import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.event.dto.PlaceUpcomingEventDto
 import com.partymap.backend.domain.event.toPlaceUpcomingEventDto
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntityRepository
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationWithDateDto
 import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.dto.PlaceCreateDto
 import com.partymap.backend.domain.place.dto.PlaceDto
 import com.partymap.backend.domain.user.CurrentUserService
+import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -25,6 +29,7 @@ class PlaceController(
     private val eventRepository: EventRepository,
     private val currentUserService: CurrentUserService,
     private val userLikesFetchService: UserLikesFetchService,
+    private val eventPlanPlaceInvitationEntityRepository: EventPlanPlaceInvitationEntityRepository,
 ) {
     @GetMapping("/places")
     fun getPlaces(): List<PlaceDto> =
@@ -124,5 +129,70 @@ class PlaceController(
         }
 
         placeRepository.deleteById(id)
+    }
+
+    @PreAuthorize("hasRole('place_manager_user')")
+    @GetMapping("/places/{id}/invitations")
+    fun getPlaceInvitations(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ): List<EventPlanPlaceInvitationWithDateDto> {
+        currentUserService.getOrCreateUser(jwt)
+
+        val place = placeRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
+
+        val invitations = eventPlanPlaceInvitationEntityRepository.findAllByPlaceId(place.id!!)
+
+        return invitations.map {
+            EventPlanPlaceInvitationWithDateDto(
+                eventPlanId = it.id.eventPlan.id!!,
+                state = it.state,
+                title = it.id.eventPlan.title,
+                startDateTime = it.id.eventPlan.startDateTime,
+                endDateTime = it.id.eventPlan.endDateTime,
+            )
+        }
+    }
+
+    @PreAuthorize("hasRole('place_manager_user')")
+    @PutMapping("/places/{id}/invitations/{eventPlanId}/respond")
+    @Transactional
+    fun respondToPlaceInvitation(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @PathVariable eventPlanId: UUID,
+        @RequestParam state: String,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val place = placeRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
+
+        if (place.owner.sub != user.sub) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "You are not allowed to manage invitations for this place"
+            )
+        }
+
+        val invitation = eventPlanPlaceInvitationEntityRepository
+            .findByPlaceIdAndEventPlanId(place.id!!, eventPlanId)
+            .orElseThrow {
+                ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Invitation for event plan $eventPlanId not found for place $id",
+                )
+            }
+
+        when (state.lowercase()) {
+            "accept" -> invitation.state = EventPlanPlaceInvitationState.ACCEPTED
+            "reject" -> invitation.state = EventPlanPlaceInvitationState.REJECTED
+            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state: $state")
+        }
+
+        eventPlanPlaceInvitationEntityRepository.save(invitation)
+
+        return HttpStatus.OK
     }
 }

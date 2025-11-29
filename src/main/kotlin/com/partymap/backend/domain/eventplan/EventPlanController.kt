@@ -1,13 +1,11 @@
 package com.partymap.backend.domain.eventplan
 
-import com.partymap.backend.domain.eventplan.db.EventPlanAdminListItemDto
-import com.partymap.backend.domain.eventplan.db.EventPlanCreateDto
-import com.partymap.backend.domain.eventplan.db.EventPlanDto
-import com.partymap.backend.domain.eventplan.db.EventPlanRepository
+import com.partymap.backend.domain.eventplan.db.*
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.toAdminListItemDto
 import com.partymap.backend.domain.user.CurrentUserService
+import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -112,6 +110,52 @@ class EventPlanController(
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $placeId not found") }
 
         eventPlanService.invitePlace(eventPlan, place)
+
+        return HttpStatus.OK
+    }
+
+    @PreAuthorize("hasRole('place_manager_user')")
+    @PostMapping("/event-plan/{id}/place-invitation/{placeId}/set-status")
+    @Transactional
+    fun setPlaceInvitationStatus(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+        @PathVariable placeId: UUID,
+        @RequestParam status: String,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id).orElseThrow {
+            ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found")
+        }
+
+        val place = placeRepository.findById(placeId)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $placeId not found") }
+
+        if (place.owner.sub != user.sub) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "You are not allowed to manage invitations for this place"
+            )
+        }
+
+        val placeInvitationOptional = Optional.ofNullable(eventPlan.placeInvitations.getOrNull(0))
+
+        if (placeInvitationOptional.isPresent) {
+            val placeInvitation = placeInvitationOptional.get()
+            placeInvitation.state = when (status.lowercase()) {
+                "accepted" -> EventPlanPlaceInvitationState.ACCEPTED
+                "rejected" -> EventPlanPlaceInvitationState.REJECTED
+                else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status: $status")
+            }
+        } else {
+            throw ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "No invitation found for place $placeId in event plan $id"
+            )
+        }
+
+        eventPlanRepository.save(eventPlan)
 
         return HttpStatus.OK
     }
