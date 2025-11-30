@@ -42,7 +42,7 @@ class PlaceEntity(
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "likedPlaces")
     var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
