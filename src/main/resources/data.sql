@@ -197,44 +197,96 @@ VALUES ('23c3c9fb-23e6-59d7-b317-dd614478e685', 'Sunset Sessions', '6375cdd9-b83
 -- We seed with NULL times.
 -- ------------------------------------------------------------------
 
--- Basic lineup items WITH times
 INSERT INTO public.event_lineup_item_entity (event_id, performer_id, start_time, end_time)
-VALUES
-    -- Sunset Sessions: DJ Aurora (single)
-    ('23c3c9fb-23e6-59d7-b317-dd614478e685', '04238ef3-0e2b-528d-b141-ab202c578afc',
-     TIME '22:00', TIME '01:00'),
+SELECT e.id,
+       uuid '04238ef3-0e2b-528d-b141-ab202c578afc' AS performer_id,
+       e.start_time + interval '2 hours'           AS start_time,
+       e.start_time + interval '5 hours'           AS end_time
+FROM public.event_entity e
+WHERE e.id = '23c3c9fb-23e6-59d7-b317-dd614478e685'
 
-    -- Basement Breaks: Klang Duo (single)
-    ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
-     TIME '22:00', TIME '01:00'),
+UNION ALL
 
-    -- Warehouse All-Nighter: DJ Aurora + MC Lumen (two performers)
-    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '04238ef3-0e2b-528d-b141-ab202c578afc',
-     TIME '22:00', TIME '00:00'),
-    ('cd931a12-7697-588b-a6c4-603d2589f7aa', '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c',
-     TIME '00:00', TIME '02:00'),
+SELECT e.id,
+       uuid '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+       e.start_time                      AS start_time,
+       e.start_time + interval '3 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2'
 
-    -- Shoreline Sunset: DJ Balcsi (single)
-    ('ee3a5589-54fc-50f2-a9b0-60056cf59478', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
-     TIME '18:00', TIME '21:00'),
+UNION ALL
 
-    -- Pier Nights: DJ Aurora + DJ Balcsi (two performers)
-    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '04238ef3-0e2b-528d-b141-ab202c578afc',
-     TIME '21:00', TIME '23:00'),
-    ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
-     TIME '23:00', TIME '01:00'),
+SELECT e.id,
+       uuid '04238ef3-0e2b-528d-b141-ab202c578afc',
+       e.start_time + interval '2 hours' AS start_time,
+       e.start_time + interval '4 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'cd931a12-7697-588b-a6c4-603d2589f7aa'
 
-    -- Waves Afterdark: Klang Duo (single)
-    ('f04864d6-cad9-5161-89d4-ede7a25d1efa', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
-     TIME '22:00', TIME '02:00'),
+UNION ALL
 
-    -- Fehérvár Bassline: Vibe Knights (single)
-    ('fa4860b4-daf2-5dc8-b7b6-dd769ea9c363', '363ed242-4068-5d2b-8750-ea2ece66d59d',
-     TIME '22:00', TIME '01:00'),
+SELECT e.id,
+       uuid '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c',
+       e.start_time + interval '4 hours' AS start_time,
+       e.start_time + interval '6 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'cd931a12-7697-588b-a6c4-603d2589f7aa'
 
-    -- Tisza Neon Ride: Szeged Synth (single)
-    ('cd83795e-7909-5a5a-b60b-cd94cf20ae8c', 'c1d21f9e-f293-5275-96db-242842b09ed3',
-     TIME '21:00', TIME '00:00');
+UNION ALL
+
+SELECT e.id,
+       uuid '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+       e.start_time + interval '1 hour'  AS start_time,
+       e.start_time + interval '4 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'ee3a5589-54fc-50f2-a9b0-60056cf59478'
+
+UNION ALL
+
+SELECT e.id,
+       uuid '04238ef3-0e2b-528d-b141-ab202c578afc',
+       e.start_time + interval '1 hour'  AS start_time,
+       e.start_time + interval '3 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = '7862fe14-5a13-5df2-96e9-1d0f55eb671a'
+
+UNION ALL
+
+SELECT e.id,
+       uuid '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
+       e.start_time + interval '3 hours' AS start_time,
+       e.start_time + interval '5 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = '7862fe14-5a13-5df2-96e9-1d0f55eb671a'
+
+UNION ALL
+
+SELECT e.id,
+       uuid '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
+       e.start_time + interval '1 hour'  AS start_time,
+       e.start_time + interval '5 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'f04864d6-cad9-5161-89d4-ede7a25d1efa'
+
+UNION ALL
+
+SELECT e.id,
+       uuid '363ed242-4068-5d2b-8750-ea2ece66d59d',
+       e.start_time + interval '1 hour'  AS start_time,
+       e.start_time + interval '4 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'fa4860b4-daf2-5dc8-b7b6-dd769ea9c363'
+
+UNION ALL
+
+SELECT e.id,
+       uuid 'c1d21f9e-f293-5275-96db-242842b09ed3',
+       e.start_time + interval '1 hour'  AS start_time,
+       e.start_time + interval '4 hours' AS end_time
+FROM public.event_entity e
+WHERE e.id = 'cd83795e-7909-5a5a-b60b-cd94cf20ae8c';
+
+
 
 -- Mirror for performer_entity_lineup_items (unchanged)
 INSERT INTO public.performer_entity_lineup_items (lineup_items_event_id, lineup_items_performer_id, performer_entity_id)

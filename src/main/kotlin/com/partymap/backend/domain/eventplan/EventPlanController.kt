@@ -5,6 +5,8 @@ import com.partymap.backend.domain.eventplan.db.EventPlanRepository
 import com.partymap.backend.domain.eventplan.dto.*
 import com.partymap.backend.domain.eventplan.exception.AlreadyInvitedPerformerException
 import com.partymap.backend.domain.eventplan.exception.InvalidStartOrEndTimeException
+import com.partymap.backend.domain.eventplan.exception.NoValidPlaceInvitationException
+import com.partymap.backend.domain.eventplan.exception.PendingLineupInvitationException
 import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
@@ -246,5 +248,36 @@ class EventPlanController(
         eventPlanRepository.save(eventPlan)
         return HttpStatus.OK
     }
+
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @PostMapping("/event-plan/{id}/publish")
+    @Transactional
+    fun publishEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ): HttpStatus {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "You are not allowed to publish this event plan"
+            )
+        }
+
+        try {
+            eventPlanService.publish(user, eventPlan)
+        } catch (e: NoValidPlaceInvitationException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message!!)
+        } catch (e: PendingLineupInvitationException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, e.message!!)
+        }
+
+        return HttpStatus.OK
+    }
+
 
 }

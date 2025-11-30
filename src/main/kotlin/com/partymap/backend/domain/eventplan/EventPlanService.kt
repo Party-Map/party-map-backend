@@ -14,7 +14,7 @@ import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.user.UserEntity
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalTime
+import java.time.LocalDateTime
 
 @Service
 class EventPlanService(
@@ -31,8 +31,8 @@ class EventPlanService(
     fun invitePerformer(
         eventPlan: EventPlanEntity,
         performer: PerformerEntity,
-        startTime: LocalTime,
-        endTime: LocalTime
+        startTime: LocalDateTime,
+        endTime: LocalDateTime
     ) {
 
         // Check if performer was already invited

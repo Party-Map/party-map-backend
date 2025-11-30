@@ -3,7 +3,7 @@ package com.partymap.backend.domain.eventplan.db
 import com.partymap.backend.domain.performer.db.PerformerEntity
 import jakarta.persistence.*
 import java.io.Serializable
-import java.time.LocalTime
+import java.time.LocalDateTime
 
 @Entity
 class EventPlanLineupInvitationEntity(
@@ -14,8 +14,8 @@ class EventPlanLineupInvitationEntity(
     @Column(nullable = false)
     var state: EventPlanLineupInvitationState = EventPlanLineupInvitationState.PENDING,
 
-    var startTime: LocalTime,
-    var endTime: LocalTime,
+    var startTime: LocalDateTime,
+    var endTime: LocalDateTime,
 )
 
 @Embeddable
