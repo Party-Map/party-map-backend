@@ -1,8 +1,6 @@
 package com.partymap.backend.domain.place
 
 import com.partymap.backend.domain.event.db.EventRepository
-import com.partymap.backend.domain.event.dto.PlaceUpcomingEventDto
-import com.partymap.backend.domain.event.toPlaceUpcomingEventDto
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntityRepository
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
 import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationWithDateDto
@@ -19,7 +17,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import java.time.LocalDateTime
 import java.util.*
 
 @RestController
@@ -41,25 +38,6 @@ class PlaceController(
         placeRepository.findById(id)
             .orElseThrow { NoSuchElementException("Place $id not found") }
             .toDto()
-
-    @GetMapping("/places/{id}/upcoming-event")
-    fun getUpcomingEventForPlace(@PathVariable id: UUID): PlaceUpcomingEventDto {
-        placeRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Place $id not found") }
-
-        val now = LocalDateTime.now()
-
-        val upcomingEvents = eventRepository
-            .findAllByPlace_IdAndEndAfterOrderByStartAsc(id, now)
-
-        val upcoming = upcomingEvents.minByOrNull { it.start }
-            ?: throw ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "No upcoming event found for place $id",
-            )
-
-        return upcoming.toPlaceUpcomingEventDto()
-    }
 
     @GetMapping("/places/liked-places")
     fun getLikedPlacesForUser(
