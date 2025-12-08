@@ -1,12 +1,12 @@
 package com.partymap.backend.domain.event
 
+import com.partymap.backend.domain.common.dto.LinkDto
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventLineupItemEntity
 import com.partymap.backend.domain.event.dto.EventAdminListItemDto
 import com.partymap.backend.domain.event.dto.EventDto
 import com.partymap.backend.domain.event.dto.EventLineupItemDto
 import com.partymap.backend.domain.event.dto.PlaceUpcomingEventDto
-import com.partymap.backend.domain.like.dto.LinkDto
 import com.partymap.backend.domain.performer.toDto
 import com.partymap.backend.domain.search.SearchHitDto
 import com.partymap.backend.domain.search.SearchHitType

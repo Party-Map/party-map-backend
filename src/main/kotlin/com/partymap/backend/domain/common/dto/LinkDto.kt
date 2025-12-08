@@ -1,4 +1,4 @@
-package com.partymap.backend.domain.like.dto
+package com.partymap.backend.domain.common.dto
 
 import com.partymap.backend.domain.common.db.LinkType
 

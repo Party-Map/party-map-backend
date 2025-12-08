@@ -28,8 +28,8 @@ class UserEntity(
     @ManyToMany
     @JoinTable(
         name = "user_liked_events",
-        joinColumns = [JoinColumn(name = "user_sub")],       // references users.sub
-        inverseJoinColumns = [JoinColumn(name = "event_id")] // references events.id (from BaseEntity)
+        joinColumns = [JoinColumn(name = "user_sub")],
+        inverseJoinColumns = [JoinColumn(name = "event_id")]
     )
     var likedEvents: MutableSet<EventEntity> = mutableSetOf(),
 

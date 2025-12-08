@@ -1,6 +1,7 @@
 package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.performer.db.PerformerEntity
+import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
 
 object PerformerSpecifications {
@@ -12,7 +13,7 @@ object PerformerSpecifications {
         }
 
         return Specification { root, _, cb ->
-            val predicates = mutableListOf<jakarta.persistence.criteria.Predicate>()
+            val predicates = mutableListOf<Predicate>()
 
             val nameExpr = root.get<String>("name")
             val genreExpr = root.get<String>("genre")

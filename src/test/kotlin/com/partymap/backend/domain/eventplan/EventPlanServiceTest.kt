@@ -24,7 +24,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.*
 
 @SpringBootTest
@@ -111,8 +110,8 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             testEventPlan,
             testPerformer,
-            LocalTime.of(20, 0),
-            LocalTime.of(22, 0)
+            testEventPlan.startDateTime,
+            testEventPlan.startDateTime.plusHours(2),
         )
 
         val invitation = testEventPlan.lineupInvitations.find { it.id.performer.id == testPerformer.id }
@@ -131,16 +130,16 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             testEventPlan,
             testPerformer,
-            LocalTime.of(20, 0),
-            LocalTime.of(22, 0)
+            testEventPlan.startDateTime,
+            testEventPlan.startDateTime.plusMinutes(30),
         )
 
         assertThrows<AlreadyInvitedPerformerException> {
             eventPlanService.invitePerformer(
                 testEventPlan,
                 testPerformer,
-                LocalTime.of(21, 0),
-                LocalTime.of(23, 0)
+                testEventPlan.startDateTime.plusMinutes(30),
+                testEventPlan.endDateTime.plusMinutes(60),
             )
         }
     }
@@ -157,8 +156,8 @@ class EventPlanServiceTest {
             eventPlanService.invitePerformer(
                 testEventPlan,
                 testPerformer,
-                LocalTime.of(21, 0),
-                LocalTime.of(20, 0)
+                testEventPlan.startDateTime.plusHours(1),
+                testEventPlan.startDateTime,
             )
         }
     }
@@ -251,20 +250,20 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             eventPlan,
             performer1,
-            LocalTime.of(20, 0),
-            LocalTime.of(20, 30)
+            start,
+            start.plusMinutes(30),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer2,
-            LocalTime.of(20, 30),
-            LocalTime.of(21, 0)
+            start.plusMinutes(30),
+            start.plusMinutes(60),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
-            LocalTime.of(21, 0),
-            LocalTime.of(21, 30)
+            start.plusMinutes(60),
+            start.plusMinutes(90),
         )
 
         // Set lineup invitation states: two accepted, one rejected
@@ -347,20 +346,20 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             eventPlan,
             performer1,
-            LocalTime.of(20, 0),
-            LocalTime.of(20, 30)
+            start,
+            start.plusMinutes(30),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer2,
-            LocalTime.of(20, 30),
-            LocalTime.of(21, 0)
+            start.plusMinutes(30),
+            start.plusMinutes(60),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
-            LocalTime.of(21, 0),
-            LocalTime.of(21, 30)
+            start.plusMinutes(60),
+            start.plusMinutes(90),
         )
 
         val invitation1 = eventPlan.lineupInvitations.first { it.id.performer.id == performer1.id }
@@ -416,20 +415,20 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             eventPlan,
             performer1,
-            LocalTime.of(20, 0),
-            LocalTime.of(20, 30)
+            start,
+            start.plusMinutes(30),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer2,
-            LocalTime.of(20, 30),
-            LocalTime.of(21, 0)
+            start.plusMinutes(30),
+            start.plusMinutes(60)
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
-            LocalTime.of(21, 0),
-            LocalTime.of(21, 30)
+            start.plusMinutes(60),
+            start.plusMinutes(90)
         )
 
         // Set lineup invitation states: all non‑pending (so the only problem is missing place)
@@ -484,20 +483,20 @@ class EventPlanServiceTest {
         eventPlanService.invitePerformer(
             eventPlan,
             performer1,
-            LocalTime.of(20, 0),
-            LocalTime.of(20, 30)
+            start,
+            start.plusMinutes(30)
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer2,
-            LocalTime.of(20, 30),
-            LocalTime.of(21, 0)
+            start.plusMinutes(30),
+            start.plusMinutes(60)
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
-            LocalTime.of(21, 0),
-            LocalTime.of(21, 30)
+            start.plusMinutes(60),
+            start.plusMinutes(90)
         )
 
         // All lineup invitations non‑pending (so only the place is invalid)

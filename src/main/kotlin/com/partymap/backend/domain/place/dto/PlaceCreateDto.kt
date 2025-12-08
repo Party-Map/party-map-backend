@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.place.dto
 
 import com.partymap.backend.domain.common.dto.GeoPointDto
-import com.partymap.backend.domain.like.dto.LinkDto
+import com.partymap.backend.domain.common.dto.LinkDto
 
 data class PlaceCreateDto(
     val name: String,

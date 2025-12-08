@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.event.dto
 
+import com.partymap.backend.domain.common.dto.LinkDto
 import com.partymap.backend.domain.event.db.EventType
-import com.partymap.backend.domain.like.dto.LinkDto
 import java.time.LocalDateTime
 import java.util.*
 

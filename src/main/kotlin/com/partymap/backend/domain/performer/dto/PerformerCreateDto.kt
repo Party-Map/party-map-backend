@@ -1,6 +1,6 @@
 package com.partymap.backend.domain.performer.dto
 
-import com.partymap.backend.domain.like.dto.LinkDto
+import com.partymap.backend.domain.common.dto.LinkDto
 
 data class PerformerCreateDto(
     val name: String,

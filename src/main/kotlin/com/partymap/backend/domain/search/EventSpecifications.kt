@@ -3,6 +3,7 @@ package com.partymap.backend.domain.search
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.place.db.PlaceEntity
 import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
 import java.time.Instant
 
@@ -24,7 +25,7 @@ object EventSpecifications {
 
             val placeJoin = root.join<EventEntity, PlaceEntity>("place", JoinType.LEFT)
 
-            val predicates = mutableListOf<jakarta.persistence.criteria.Predicate>()
+            val predicates = mutableListOf<Predicate>()
 
             val titleExpr = root.get<String>("title")
             val kindExpr = root.get<String>("kind")

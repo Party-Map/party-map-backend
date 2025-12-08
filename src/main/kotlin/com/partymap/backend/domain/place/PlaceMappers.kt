@@ -4,7 +4,7 @@ package com.partymap.backend.domain.place
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.common.dto.GeoPointDto
-import com.partymap.backend.domain.like.dto.LinkDto
+import com.partymap.backend.domain.common.dto.LinkDto
 import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.dto.PlaceCreateDto

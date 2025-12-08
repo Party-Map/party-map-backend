@@ -2,6 +2,7 @@ package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.place.db.PlaceEntity
 import jakarta.persistence.criteria.JoinType
+import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
 
 object PlaceSpecifications {
@@ -13,7 +14,7 @@ object PlaceSpecifications {
         }
 
         return Specification { root, _, cb ->
-            val predicates = mutableListOf<jakarta.persistence.criteria.Predicate>()
+            val predicates = mutableListOf<Predicate>()
 
             val nameExpr = root.get<String>("name")
             val cityExpr = root.get<String>("city")

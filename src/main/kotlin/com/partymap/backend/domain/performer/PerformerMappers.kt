@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.performer
 
 import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.like.dto.LinkDto
+import com.partymap.backend.domain.common.dto.LinkDto
 import com.partymap.backend.domain.performer.db.PerformerEntity
 import com.partymap.backend.domain.performer.dto.PerformerAdminListItemDto
 import com.partymap.backend.domain.performer.dto.PerformerCreateDto
