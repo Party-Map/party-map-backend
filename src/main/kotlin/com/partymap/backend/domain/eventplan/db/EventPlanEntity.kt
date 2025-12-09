@@ -33,8 +33,8 @@ class EventPlanEntity(
 
     @ElementCollection
     @CollectionTable(
-        name = "event_links",
-        joinColumns = [JoinColumn(name = "event_id")]
+        name = "event_plan_links",
+        joinColumns = [JoinColumn(name = "event_plan_id")],
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 

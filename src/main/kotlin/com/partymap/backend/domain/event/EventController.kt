@@ -10,7 +10,6 @@ import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.performer.db.PerformerRepository
 import com.partymap.backend.domain.performer.dto.PerformerDto
 import com.partymap.backend.domain.performer.toDto
-import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceDto
 import com.partymap.backend.domain.place.toDto
 import com.partymap.backend.domain.user.CurrentUserService
@@ -27,7 +26,6 @@ class EventController(
     private val eventRepository: EventRepository,
     private val currentUserService: CurrentUserService,
     private val userLikesFetchService: UserLikesFetchService,
-    private val placeRepository: PlaceRepository,
     private val performerRepository: PerformerRepository,
 ) {
 
