@@ -30,6 +30,23 @@ class EventPlanController(
     private val eventPlanService: EventPlanService,
     private val performerRepository: PerformerRepository
 ) {
+    @PreAuthorize("hasRole('event_organizer_user')")
+    @GetMapping("/event-plan/{id}")
+    fun getEventPlan(
+        @AuthenticationPrincipal jwt: Jwt,
+        @PathVariable id: UUID,
+    ): EventPlanDto {
+        val user = currentUserService.getOrCreateUser(jwt)
+
+        val eventPlan = eventPlanRepository.findById(id)
+            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Event plan $id not found") }
+
+        if (eventPlan.owner.sub != user.sub) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to view this event plan")
+        }
+
+        return eventPlan.toDto()
+    }
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/places")
