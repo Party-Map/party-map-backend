@@ -18,16 +18,13 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-class SecurityConfig() {
+class SecurityConfig {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             authorizeHttpRequests {
                 authorize(anyRequest, permitAll)
-            }
-            oauth2ResourceServer {
-                jwt { }
             }
             cors {}
             csrf { disable() }

@@ -1,7 +1,6 @@
 package com.partymap.backend.domain.place
 
-import com.partymap.backend.domain.event.db.EventRepository
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntityRepository
+import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationRepository
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
 import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationWithDateDto
 import com.partymap.backend.domain.like.service.UserLikesFetchService
@@ -23,10 +22,9 @@ import java.util.*
 @RequestMapping("/api")
 class PlaceController(
     private val placeRepository: PlaceRepository,
-    private val eventRepository: EventRepository,
     private val currentUserService: CurrentUserService,
     private val userLikesFetchService: UserLikesFetchService,
-    private val eventPlanPlaceInvitationEntityRepository: EventPlanPlaceInvitationEntityRepository,
+    private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
 ) {
     @GetMapping("/places")
     fun getPlaces(): List<PlaceDto> =
@@ -91,25 +89,6 @@ class PlaceController(
     }
 
     @PreAuthorize("hasRole('place_manager_user')")
-    @DeleteMapping("/places/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deletePlace(
-        @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable id: UUID,
-    ) {
-        val user = currentUserService.getOrCreateUser(jwt)
-
-        val place = placeRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
-
-        if (place.owner.sub != user.sub) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this place")
-        }
-
-        placeRepository.deleteById(id)
-    }
-
-    @PreAuthorize("hasRole('place_manager_user')")
     @GetMapping("/places/{id}/invitations")
     fun getPlaceInvitations(
         @AuthenticationPrincipal jwt: Jwt,
@@ -120,7 +99,7 @@ class PlaceController(
         val place = placeRepository.findById(id)
             .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
 
-        val invitations = eventPlanPlaceInvitationEntityRepository.findAllByPlaceId(place.id!!)
+        val invitations = eventPlanPlaceInvitationRepository.findAllByPlaceId(place.id!!)
 
         return invitations.map {
             EventPlanPlaceInvitationWithDateDto(
@@ -154,7 +133,7 @@ class PlaceController(
             )
         }
 
-        val invitation = eventPlanPlaceInvitationEntityRepository
+        val invitation = eventPlanPlaceInvitationRepository
             .findByPlaceIdAndEventPlanId(place.id!!, eventPlanId)
             .orElseThrow {
                 ResponseStatusException(
@@ -169,7 +148,7 @@ class PlaceController(
             else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state: $state")
         }
 
-        eventPlanPlaceInvitationEntityRepository.save(invitation)
+        eventPlanPlaceInvitationRepository.save(invitation)
 
         return HttpStatus.OK
     }

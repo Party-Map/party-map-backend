@@ -5,7 +5,7 @@ import com.partymap.backend.domain.place.db.PlaceEntity
 import jakarta.persistence.criteria.JoinType
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.jpa.domain.Specification
-import java.time.Instant
+import java.time.LocalDateTime
 
 object EventSpecifications {
 
@@ -13,14 +13,14 @@ object EventSpecifications {
         val keywords = SearchUtils.prepareKeywords(rawQuery)
         if (keywords.isEmpty()) {
             return Specification { root, _, cb ->
-                cb.greaterThan(root.get("end"), Instant.now())
+                cb.greaterThan(root.get("end"), LocalDateTime.now())
             }
         }
 
         return Specification { root, query, cb ->
             query?.distinct(true)
 
-            val now = Instant.now()
+            val now = LocalDateTime.now()
             val futurePredicate = cb.greaterThan(root.get("end"), now)
 
             val placeJoin = root.join<EventEntity, PlaceEntity>("place", JoinType.LEFT)

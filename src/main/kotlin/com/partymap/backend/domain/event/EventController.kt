@@ -8,8 +8,6 @@ import com.partymap.backend.domain.event.dto.PlaceUpcomingEventDto
 import com.partymap.backend.domain.like.dto.LikedEventsGroupedDto
 import com.partymap.backend.domain.like.service.UserLikesFetchService
 import com.partymap.backend.domain.performer.db.PerformerRepository
-import com.partymap.backend.domain.performer.dto.PerformerDto
-import com.partymap.backend.domain.performer.toDto
 import com.partymap.backend.domain.place.dto.PlaceDto
 import com.partymap.backend.domain.place.toDto
 import com.partymap.backend.domain.user.CurrentUserService
@@ -59,14 +57,6 @@ class EventController(
             .orElseThrow { NoSuchElementException("Event $id not found") }
 
         return event.place.toDto()
-    }
-
-    @GetMapping("/events/{id}/performers")
-    fun getPerformersByEventId(@PathVariable id: UUID): List<PerformerDto> {
-        val event = eventRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Event $id not found") }
-
-        return event.lineupItems.map { it.id.performer.toDto() }.distinct()
     }
 
     @GetMapping("/events/upcoming-events")

@@ -10,7 +10,7 @@ object PlaceSpecifications {
     fun matchesQuery(rawQuery: String): Specification<PlaceEntity> {
         val keywords = SearchUtils.prepareKeywords(rawQuery)
         if (keywords.isEmpty()) {
-            return Specification { _, _, _ -> null } // no extra filtering
+            return Specification { _, _, _ -> null }
         }
 
         return Specification { root, _, cb ->

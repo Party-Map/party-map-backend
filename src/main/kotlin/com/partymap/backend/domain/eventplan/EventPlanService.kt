@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @Service
 class EventPlanService(
     private val eventPlanRepository: EventPlanRepository,
-    private val eventPlanPlaceInvitationEntityRepository: EventPlanPlaceInvitationEntityRepository,
+    private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
     private val eventRepository: EventRepository
 ) {
 
@@ -59,7 +59,7 @@ class EventPlanService(
         // Delete invitation if that already exists
         if (eventPlan.placeInvitations.size == 1) {
             val existingInvitation = eventPlan.placeInvitations[0]
-            eventPlanPlaceInvitationEntityRepository.delete(existingInvitation)
+            eventPlanPlaceInvitationRepository.delete(existingInvitation)
             eventPlan.placeInvitations.remove(existingInvitation)
         }
 

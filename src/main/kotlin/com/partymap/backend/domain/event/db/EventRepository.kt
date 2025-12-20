@@ -8,11 +8,6 @@ import java.util.*
 interface EventRepository : JpaRepository<EventEntity, UUID>, JpaSpecificationExecutor<EventEntity> {
     fun findAllByPlace_Id(placeId: UUID): List<EventEntity>
 
-    fun findAllByPlace_IdAndEndAfterOrderByStartAsc(
-        placeId: UUID,
-        endAfter: LocalDateTime,
-    ): List<EventEntity>
-
     fun findAllByEndAfterOrderByPlace_IdAscStartAsc(
         endAfter: LocalDateTime,
     ): List<EventEntity>

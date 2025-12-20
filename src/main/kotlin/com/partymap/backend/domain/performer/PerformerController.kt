@@ -69,7 +69,7 @@ class PerformerController(
         return saved.toDto()
     }
 
-    @PreAuthorize("hasRole('place_manager_user')")
+    @PreAuthorize("hasRole('performer_manager_user')")
     @PutMapping("/performers/{id}")
     fun updatePlace(
         @AuthenticationPrincipal jwt: Jwt,

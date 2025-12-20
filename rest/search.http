@@ -39,7 +39,7 @@ Accept: application/json
 
     client.test("Request returns the right number of hits", function () {
         const len = jsonPath(response.body, "$.hits.length()");
-        client.assert(len === 7, "Expected 7 hits");
+        client.assert(len === 6, "Expected 6 hits");
     });
 
     client.test("Contains an EVENT", function () {
