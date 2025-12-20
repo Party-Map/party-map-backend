@@ -11,8 +11,6 @@ services:
       start_period: 5s
     ports:
       - "5432:5432"
-#    networks:
-#      - party-map-net
 
   backend:
     build:
@@ -28,12 +26,7 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-#    networks:
-#      - party-map-net
+
 
 volumes:
   db:
-
-#networks:
-#  party-map-net:
-#    external: true
