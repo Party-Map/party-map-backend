@@ -1,0 +1,26 @@
+@startuml
+title Eseményterv publikálás – egyszerű folyamatábra
+
+start
+:publish(user, eventPlan) meghívása;
+
+if (Van ACCEPTED helyszín meghívás?) then (igen)
+  if (Van PENDING fellépési meghívás?) then (igen)
+    :PendingLineupInvitationException;
+    stop
+  else (nem)
+    :EventEntity létrehozása az EventPlan adataiból;
+    :eventRepository.save(event);
+    :ACCEPTED fellépési meghívások kiválasztása;
+    :EventLineupItemEntity lista létrehozása;
+    :event.lineupItems beállítása;
+    :eventPlanRepository.delete(eventPlan);
+    :Sikeres publikálás;
+    stop
+  endif
+else (nem)
+  :NoValidPlaceInvitationException;
+  stop
+endif
+
+@enduml

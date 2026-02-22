@@ -1,0 +1,33 @@
+@startuml
+skinparam linetype ortho
+left to right direction
+
+actor Felhasználó as User
+
+package "Megjelenítési réteg\n(Frontend)" as FrontendLayer {
+  [Next.js + React] as Frontend
+  [Leaflet térkép] as Map
+  Frontend --> Map
+}
+
+package "logikai réteg\n(Spring Boot)" as BackendLayer {
+  [REST API] as Api
+  [Üzleti logika (Service réteg)] as Services
+  Api --> Services
+}
+
+cloud "Hitelesítés\n(Keycloak)" {
+  [OIDC Provider] as Keycloak
+}
+
+database "Adatbázis réteg\n" {
+  [PostgreSQL] as RelDB
+}
+
+User <--> FrontendLayer : Interfész használata
+Frontend <--> Api : REST API hívások\n(JSON request/response)
+Api <--> Keycloak : Token ellenőrzés\n(OIDC endpointok)
+Services <--> RelDB
+User <--> Keycloak : Bejelentkezés\n és regisztráció
+
+@enduml

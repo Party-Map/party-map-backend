@@ -1,0 +1,35 @@
+@startuml
+
+skinparam linetype ortho
+
+start
+
+:publish(user, eventPlan);
+
+if (Van elfogadott helyszín meghívás?\n(placeInvitations.state == ACCEPTED)) then (igen)
+else (nincs)
+  :NoValidPlaceInvitationException;
+  stop
+endif
+
+if (Van függő fellépési meghívás?\n(lineupInvitations.state == PENDING)) then (igen)
+  :PendingLineupInvitationException;
+  stop
+else (nincs)
+endif
+
+:EventEntity összeállítása\nplace=meghívott helyszín,\nowner=user;
+:eventRepository.save(event);
+
+:Elfogadott fellépési meghívások szűrése\n(lineupInvitations.state == ACCEPTED);
+
+:EventLineupItemEntity-k létrehozása;
+
+:lineupItems hozzárendelése az Event-hez;
+
+:eventPlanRepository.delete(eventPlan);
+
+:Sikeres publikálás;
+
+stop
+@enduml

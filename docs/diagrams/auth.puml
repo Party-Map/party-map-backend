@@ -1,0 +1,36 @@
+@startuml
+autonumber
+
+actor Felhasználó as User
+participant "Kliens alkalmazás" as Client
+participant "Keycloak\nAutorizációs szerver" as KC
+participant "Erőforrás-\nszerver (API)" as RS
+
+User -> Client: Védett erőforrás kérése
+Client -> KC: Autorizációs kérés\n/openid-connect/auth
+KC --> User: Átirányítás a bejelentkező oldalra
+User -> KC: Hitelesítő adatok elküldése\n(email/jelszó)
+
+KC -> KC: Felhasználó hitelesítése\nés tokenek előállítása
+KC --> Client: Átirányítás\nAuthorization Code-dal
+
+Client -> KC: Token kérés\n/openid-connect/token
+KC --> Client: Access Token (JWT)\n+ Refresh Token
+
+Client -> RS: HTTPS kérés\nAuthorization: Bearer <JWT>
+
+RS -> KC: GET .well-known/openid-configuration\n(issuer, JWKS URI lekérése)
+KC --> RS: Discovery dokumentum\n(OpenID konfiguráció)
+
+RS -> KC: GET /protocol/openid-connect/certs\n(JWKS)
+KC --> RS: JWKS (publikus kulcsok)
+
+RS -> RS: JWT validálása\n- Aláírás (JWKS alapján)\n- Claim-ek (iss, stb.)
+RS --> Client: Védett erőforrás válasz
+
+== Ha a token érvénytelen/lejárt ==
+Client -> RS: Kérés érvénytelen/lejárt JWT-vel
+RS -> RS: Validálás sikertelen
+RS --> Client: 401 Unauthorized
+
+@enduml

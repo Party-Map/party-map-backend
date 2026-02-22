@@ -1,0 +1,21 @@
+@startuml
+skinparam folderStyle rectangle
+skinparam shadowing false
+skinparam defaultTextAlignment left
+skinparam fontsize 16
+
+folder "digitalbank" as root
+
+folder "config" as f1
+folder "feature" as f2
+folder "scheduled" as f3
+folder "security" as f4
+folder "util" as f5
+
+root -down- f1
+root -down- f2
+root -down- f3
+root -down- f4
+root -down- f5
+
+@enduml

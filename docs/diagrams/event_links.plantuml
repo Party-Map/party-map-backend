@@ -1,0 +1,138 @@
+@startuml
+
+skinparam linetype ortho
+left to right direction
+
+
+entity event_links {
+   event_id: uuid
+   type: varchar(255)
+   url: varchar(255)
+}
+entity event_performers {
+   event_id: uuid
+   performer_id: uuid
+}
+entity event_tags {
+   event_id: uuid
+   tag_id: varchar(255)
+}
+entity events {
+   created_at: timestamp(6) with time zone
+   end_time: timestamp(6) with time zone
+   start_time: timestamp(6) with time zone
+   updated_at: timestamp(6) with time zone
+   owner_id: uuid
+   place_id: uuid
+   description: text
+   image: varchar(255)
+   kind: varchar(255)
+   price: varchar(255)
+   title: varchar(255)
+   id: uuid
+}
+entity performer_links {
+   performer_id: uuid
+   type: varchar(255)
+   url: varchar(255)
+}
+entity performer_tags {
+   performer_id: uuid
+   tag_id: varchar(255)
+}
+entity performers {
+   created_at: timestamp(6) with time zone
+   updated_at: timestamp(6) with time zone
+   owner_id: uuid
+   bio: text
+   genre: varchar(255)
+   image: varchar(255)
+   name: varchar(255)
+   id: uuid
+}
+entity place_links {
+   place_id: uuid
+   type: varchar(255)
+   url: varchar(255)
+}
+entity place_tags {
+   place_id: uuid
+   tag: varchar(255)
+}
+entity places {
+   latitude: double precision
+   longitude: double precision
+   created_at: timestamp(6) with time zone
+   updated_at: timestamp(6) with time zone
+   owner_id: uuid
+   address: varchar(255)
+   city: varchar(255)
+   description: text
+   image: varchar(255)
+   name: varchar(255)
+   id: uuid
+}
+entity tag_usages {
+   tag_id: varchar(255)
+   usage: varchar(255)
+}
+entity tags {
+   color: varchar(255)
+   label: varchar(255)
+   slug: varchar(255)
+}
+entity user_favorite_events {
+   event_id: uuid
+   user_sub: uuid
+}
+entity user_favorite_performers {
+   performer_id: uuid
+   user_sub: uuid
+}
+entity user_favorite_places {
+   place_id: uuid
+   user_sub: uuid
+}
+entity user_liked_events {
+   event_id: uuid
+   user_sub: uuid
+}
+entity user_liked_performers {
+   performer_id: uuid
+   user_sub: uuid
+}
+entity user_liked_places {
+   place_id: uuid
+   user_sub: uuid
+}
+entity users {
+   created_at: timestamp(6) with time zone
+   updated_at: timestamp(6) with time zone
+   sub: uuid
+}
+
+event_links               --*  events                   : "event_id:id"
+event_performers          --*  events                   : "event_id:id"
+event_performers          --  performers               : "performer_id:id"
+event_tags                --*  events                   : "event_id:id"
+event_tags                --  tags                     : "tag_id:slug"
+events                    --^  places                   : "place_id:id"
+events                    --^  users                    : "owner_id:sub"
+performer_links           --^  performers               : "performer_id:id"
+performer_tags            --^  performers               : "performer_id:id"
+performer_tags            --^  tags                     : "tag_id:slug"
+performers                --^  users                    : "owner_id:sub"
+place_links               --^  places                   : "place_id:id"
+place_tags                --^  places                   : "place_id:id"
+places                    --^  users                    : "owner_id:sub"
+tag_usages                --^  tags                     : "tag_id:slug"
+user_favorite_events      --^  events                   : "event_id:id"
+user_favorite_performers  --^  performers               : "performer_id:id"
+user_favorite_places      --^  places                   : "place_id:id"
+user_liked_events         --^  events                   : "event_id:id"
+user_liked_events         --^  users                    : "user_sub:sub"
+user_liked_performers     --^  performers               : "performer_id:id"
+user_liked_performers     --^  users                    : "user_sub:sub"
+user_liked_places         --^  places                   : "place_id:id"
+user_liked_places         --^  users                    : "user_sub:sub"
+@enduml

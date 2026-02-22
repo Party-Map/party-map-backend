@@ -1,0 +1,99 @@
+@startuml
+
+skinparam linetype ortho
+
+' ---------------------------------------------------------
+' USER
+' ---------------------------------------------------------
+class User {
+    UUID sub
+}
+
+
+' ---------------------------------------------------------
+' EVENT
+' ---------------------------------------------------------
+class Event {
+    UUID id
+    String title
+    String description
+    LocalDateTime start
+    LocalDateTime end
+    String image
+    String price
+    EventType kind
+}
+
+class EventLineupItem
+
+
+' ---------------------------------------------------------
+' EVENT PLAN
+' ---------------------------------------------------------
+class EventPlan {
+    UUID id
+    String title
+    String description
+    LocalDateTime startDateTime
+    LocalDateTime endDateTime
+    String image
+    String price
+    EventType kind
+}
+
+class EventPlanPlaceInvitation
+class EventPlanLineupInvitation
+
+
+' ---------------------------------------------------------
+' PERFORMER
+' ---------------------------------------------------------
+class Performer {
+    UUID id
+    String name
+    String genre
+    String bio
+    String image
+}
+
+
+' ---------------------------------------------------------
+' PLACE
+' ---------------------------------------------------------
+class Place {
+    UUID id
+    String name
+    String address
+    String city
+    String description
+    String image
+}
+
+
+' ---------------------------------------------------------
+' RELATIONS
+' ---------------------------------------------------------
+
+' --- Event relations ---
+Event "many" --> "1" Place : place
+Event "many" --> "1" User : owner
+Event "1" o-- "*" EventLineupItem : lineupItems
+User "*" -- "*" Event : likedEvents / likedByUsers
+
+' --- EventPlan relations ---
+EventPlan "many" --> "1" User : owner
+EventPlan "1" o-- "*" EventPlanPlaceInvitation : placeInvitations
+EventPlan "1" o-- "*" EventPlanLineupInvitation : lineupInvitations
+EventPlan "many" --> "1" Place : suggestedPlacede
+' --- Performer relations ---
+Performer "many" --> "1" User : owner
+Performer "1" o-- "*" EventLineupItem : lineupItems
+Performer "1" o-- "*" EventPlanLineupInvitation : lineupInvitations
+User "*" -- "*" Performer : likedPerformers / likedByUsers
+
+' --- Place relations ---
+Place "many" --> "1" User : owner
+User "*" -- "*" Place : likedPlaces / likedByUsers
+
+
+@enduml
