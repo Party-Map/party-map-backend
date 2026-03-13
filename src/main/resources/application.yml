@@ -1,27 +1,19 @@
 spring:
-  sql:
-    init:
-      mode: always
+  datasource:
+    url: jdbc:postgresql://db:5432/${APP_DB_NAME}
+    username: ${APP_DB_USER}
+    password: ${APP_DB_PASS}
   jpa:
     hibernate:
-      ddl-auto: create
-    show-sql: true
-    defer-datasource-initialization: true
-  datasource:
-    url: jdbc:postgresql://localhost:5432/partymap
-    username: partymap
-    password: partymap
+      ddl-auto: update
+    show-sql: false
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/party-map
+          issuer-uri: https://auth.terkep.party/realms/party-map
 server:
+  forward-headers-strategy: native
   tomcat:
     accesslog:
       enabled: true
-      directory: /dev
-      prefix: stdout
-      buffered: false
-      suffix:
-      file-date-format:

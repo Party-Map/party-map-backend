@@ -22,4 +22,18 @@ class CorsConfig {
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
+
+    @Bean
+    @Profile("prod")
+    fun prodCorsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.addAllowedOrigin("https://terkep.party")
+        configuration.addAllowedMethod("*")
+        configuration.addAllowedHeader("*")
+        configuration.allowCredentials = true
+
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
+    }
 }
