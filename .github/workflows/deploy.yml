@@ -26,10 +26,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # --- ADD THIS STEP TO FIX THE UPPERCASE ISSUE ---
+      - name: Lowercase the repo name
+        run: echo "IMAGE_ID=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # This creates a tag like ghcr.io/your-user/your-repo:latest
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          # Use the new lowercase env variable here
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_ID }}:latest
