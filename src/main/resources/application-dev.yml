@@ -15,7 +15,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/party-map
+          issuer-uri: https://auth.terkep.party/realms/party-map
 server:
   tomcat:
     accesslog:
