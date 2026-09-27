@@ -17,7 +17,7 @@ schema is recreated and seeded from `src/main/resources/data.sql` on every start
 | Service | URL | Credentials |
 |---|---|---|
 | Backend | http://localhost:8080/api/places | JWT from Keycloak for protected endpoints |
-| Keycloak admin console | http://localhost:8081 | admin / admin |
+| Keycloak admin console | http://localhost:8081 | admin / adminpass |
 | Keycloak dev users (realm `party-map`) | | e2e@partymap.local / e2e-password (all manager roles); adrian@szell.dev (reset the password in the console) |
 | PostgreSQL | localhost:5432 | partymap / partymap |
 

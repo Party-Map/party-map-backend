@@ -2,7 +2,7 @@
 #
 #   db           PostgreSQL 17 for the app        localhost:5432   partymap / partymap
 #   keycloak-db  PostgreSQL 16 for Keycloak       (internal)
-#   keycloak     Keycloak 26 in dev mode          http://localhost:8081   admin / admin
+#   keycloak     Keycloak 26 in dev mode          http://localhost:8081   admin / adminpass
 #                realm "party-map" imported from ./keycloak/party-map-realm.json on first start
 #   backend      this application, dev profile   http://localhost:8080
 #                (schema recreated and seeded from data.sql on every start)
@@ -46,7 +46,7 @@ services:
     command: start-dev --http-port=8080 --import-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: adminpass
       KC_DB: postgres
       KC_DB_URL_HOST: keycloak-db
       KC_DB_URL_PORT: 5432
