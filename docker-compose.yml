@@ -1,32 +1,93 @@
+# Development stack for the backend. Run `docker compose up` in this folder.
+#
+#   db           PostgreSQL 17 for the app        localhost:5432   partymap / partymap
+#   keycloak-db  PostgreSQL 16 for Keycloak       (internal)
+#   keycloak     Keycloak 26 in dev mode          http://localhost:8081   admin / admin
+#                realm "party-map" imported from ./keycloak/party-map-realm.json on first start
+#   backend      this application, dev profile   http://localhost:8080
+#                (schema recreated and seeded from data.sql on every start)
+#
+# Hot reload while coding: `docker compose up db keycloak` and run the app on the host with
+#   SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+# The frontend has its own compose file in ../party-map-frontend.
 services:
   db:
     image: postgres:17-alpine
-    volumes:
-      - db:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${APP_DB_PASS}
-      POSTGRES_USER: ${APP_DB_USER}
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${APP_DB_USER} -d ${APP_DB_NAME}" ]
-      start_period: 5s
+      POSTGRES_DB: partymap
+      POSTGRES_USER: partymap
+      POSTGRES_PASSWORD: partymap
     ports:
       - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U partymap -d partymap"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: start-dev --http-port=8080 --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+      KC_HEALTH_ENABLED: "true"
+    volumes:
+      - ./keycloak:/opt/keycloak/data/import:ro
+    ports:
+      - "8081:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      # The image has no curl; bash can open the management port directly.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && head -n1 <&3 | grep -q 200"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${APP_DB_NAME}
-      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER}
-      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASS}
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/party-map
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/partymap
+      SPRING_DATASOURCE_USERNAME: partymap
+      SPRING_DATASOURCE_PASSWORD: partymap
+      # Browsers get their tokens from http://localhost:8081, so that is the issuer to accept;
+      # the signing keys are fetched over the Docker network.
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/party-map
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/party-map/protocol/openid-connect/certs
+    ports:
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "8080:8080"
-
+      keycloak:
+        condition: service_healthy
 
 volumes:
-  db:
+  db-data:
+  keycloak-db-data:

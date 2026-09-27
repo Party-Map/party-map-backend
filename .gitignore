@@ -8,7 +8,6 @@
 .gradle/
 /.gradle-cache/
 /gradle-app.setting
-!gradle/wrapper/gradle-wrapper.jar  # keep wrapper jar
 !gradle/wrapper/gradle-wrapper.properties
 
 # === Kotlin ===
@@ -58,3 +57,6 @@ docker-compose.override.yml
 # === Misc ===
 hs_err_pid*
 replay_pid*
+
+# Keep the Gradle wrapper jar (the *.jar rule above must not swallow it)
+!gradle/wrapper/gradle-wrapper.jar
