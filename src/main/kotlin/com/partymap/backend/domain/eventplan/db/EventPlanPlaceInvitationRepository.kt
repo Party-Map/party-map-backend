@@ -3,7 +3,8 @@ package com.partymap.backend.domain.eventplan.db
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import java.util.*
+import java.util.Optional
+import java.util.UUID
 
 interface EventPlanPlaceInvitationRepository :
     JpaRepository<EventPlanPlaceInvitationEntity, EventPlanPlaceInvitationEntityId> {

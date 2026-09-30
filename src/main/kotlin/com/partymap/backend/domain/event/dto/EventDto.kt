@@ -3,7 +3,7 @@ package com.partymap.backend.domain.event.dto
 import com.partymap.backend.domain.common.dto.LinkDto
 import com.partymap.backend.domain.event.db.EventType
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class EventDto(
     val id: UUID,

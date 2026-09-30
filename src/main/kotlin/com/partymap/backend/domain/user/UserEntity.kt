@@ -3,12 +3,18 @@ package com.partymap.backend.domain.user
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.performer.db.PerformerEntity
 import com.partymap.backend.domain.place.db.PlaceEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
+import jakarta.persistence.ManyToMany
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)

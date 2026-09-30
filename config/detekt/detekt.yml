@@ -1,0 +1,14 @@
+# Project overrides on top of detekt's default configuration (buildUponDefaultConfig = true).
+# The build fails on any finding; change a rule here only with a reason next to it.
+
+naming:
+  FunctionNaming:
+    # Test names read as sentences (`fun \`owner can edit a place\`()`).
+    excludes: ['**/test/**']
+
+complexity:
+  LongParameterList:
+    # Entities and DTOs are constructor-heavy data holders.
+    allowedConstructorParameters: 12
+  LongMethod:
+    excludes: ['**/test/**']

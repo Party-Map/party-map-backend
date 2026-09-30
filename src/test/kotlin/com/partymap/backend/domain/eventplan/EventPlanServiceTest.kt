@@ -27,7 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -287,7 +287,7 @@ class EventPlanServiceTest {
         // Publish
         eventPlanService.publish(owner, eventPlan)
 
-        val events = eventRepository.findAllByOwner_Sub(owner.sub)
+        val events = eventRepository.findAllByOwnerSub(owner.sub)
         Assertions.assertEquals(1, events.size)
         val event = events.first()
 

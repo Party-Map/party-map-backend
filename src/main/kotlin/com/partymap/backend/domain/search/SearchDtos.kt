@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.search
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 enum class SearchHitType {
     PLACE,

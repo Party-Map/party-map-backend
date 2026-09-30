@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.event.dto
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class EventAdminListItemDto(
     val id: UUID,

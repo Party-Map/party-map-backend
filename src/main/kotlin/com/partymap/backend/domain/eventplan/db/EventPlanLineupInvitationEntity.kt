@@ -1,7 +1,13 @@
 package com.partymap.backend.domain.eventplan.db
 
 import com.partymap.backend.domain.performer.db.PerformerEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.ManyToOne
 import java.io.Serializable
 import java.time.LocalDateTime
 
@@ -25,4 +31,8 @@ data class EventPlanLineupItemId(
 
     @ManyToOne
     var performer: PerformerEntity,
-) : Serializable
+) : Serializable {
+    companion object {
+        private const val serialVersionUID = 1L
+    }
+}

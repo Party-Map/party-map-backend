@@ -11,7 +11,7 @@ import com.partymap.backend.domain.place.dto.PlaceDto
 import com.partymap.backend.domain.place.toDto
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Service
 class UserLikesFetchService(
@@ -20,7 +20,7 @@ class UserLikesFetchService(
     private val performerRepository: PerformerRepository,
 ) {
     fun getLikedEventsGrouped(sub: UUID): LikedEventsGroupedDto {
-        val events = eventRepository.findAllByLikedByUsers_Sub(sub)
+        val events = eventRepository.findAllByLikedByUsersSub(sub)
 
         val now = LocalDateTime.now()
 
@@ -40,9 +40,9 @@ class UserLikesFetchService(
         )
     }
 
-    fun getLikedPlaces(sub: UUID): List<PlaceDto> = placeRepository.findAllByLikedByUsers_Sub(sub)
+    fun getLikedPlaces(sub: UUID): List<PlaceDto> = placeRepository.findAllByLikedByUsersSub(sub)
         .map { it.toDto() }
 
-    fun getLikedPerformers(sub: UUID): List<PerformerDto> = performerRepository.findAllByLikedByUsers_Sub(sub)
+    fun getLikedPerformers(sub: UUID): List<PerformerDto> = performerRepository.findAllByLikedByUsersSub(sub)
         .map { it.toDto() }
 }

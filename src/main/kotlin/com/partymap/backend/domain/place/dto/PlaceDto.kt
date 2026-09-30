@@ -2,7 +2,7 @@ package com.partymap.backend.domain.place.dto
 
 import com.partymap.backend.domain.common.dto.GeoPointDto
 import com.partymap.backend.domain.common.dto.LinkDto
-import java.util.*
+import java.util.UUID
 
 data class PlaceDto(
     val id: UUID,

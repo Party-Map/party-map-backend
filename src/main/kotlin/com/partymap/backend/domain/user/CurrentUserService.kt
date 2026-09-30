@@ -3,7 +3,7 @@ package com.partymap.backend.domain.user
 import jakarta.transaction.Transactional
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
 class CurrentUserService(private val userRepository: UserRepository) {

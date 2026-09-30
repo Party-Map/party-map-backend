@@ -2,7 +2,11 @@ package com.partymap.backend.domain.eventplan
 
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
 import com.partymap.backend.domain.eventplan.db.EventPlanRepository
-import com.partymap.backend.domain.eventplan.dto.*
+import com.partymap.backend.domain.eventplan.dto.EventPlanAdminListItemDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanCreateDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationCreatePayloadDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationDto
 import com.partymap.backend.domain.eventplan.exception.AlreadyInvitedPerformerException
 import com.partymap.backend.domain.eventplan.exception.InvalidStartOrEndTimeException
 import com.partymap.backend.domain.eventplan.exception.NoValidPlaceInvitationException
@@ -17,9 +21,18 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
+import java.util.Optional
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api")
@@ -56,7 +69,7 @@ class EventPlanController(
     @GetMapping("/event-plan/owned-event-plans")
     fun getMyOwnedEventsForUser(@AuthenticationPrincipal jwt: Jwt): List<EventPlanAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
-        return eventPlanRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
+        return eventPlanRepository.findAllByOwnerSub(user.sub).map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('event_organizer_user')")

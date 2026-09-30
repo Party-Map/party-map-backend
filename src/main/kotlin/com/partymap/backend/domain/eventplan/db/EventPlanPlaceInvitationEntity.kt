@@ -1,7 +1,13 @@
 package com.partymap.backend.domain.eventplan.db
 
 import com.partymap.backend.domain.place.db.PlaceEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
+import jakarta.persistence.EmbeddedId
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.ManyToOne
 import java.io.Serializable
 
 @Entity
@@ -21,4 +27,8 @@ data class EventPlanPlaceInvitationEntityId(
 
     @ManyToOne
     var place: PlaceEntity,
-) : Serializable
+) : Serializable {
+    companion object {
+        private const val serialVersionUID = 1L
+    }
+}

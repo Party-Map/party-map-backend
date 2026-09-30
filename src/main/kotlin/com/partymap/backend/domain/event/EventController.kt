@@ -14,9 +14,13 @@ import com.partymap.backend.domain.user.CurrentUserService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api")
@@ -35,7 +39,7 @@ class EventController(
         @RequestParam(required = false) performerId: UUID?,
     ): List<EventDto> {
         val events = when {
-            placeId != null -> eventRepository.findAllByPlace_Id(placeId)
+            placeId != null -> eventRepository.findAllByPlaceId(placeId)
 
             performerId != null -> performerRepository.findById(performerId).map { performerEntity ->
                 performerEntity.lineupItems.map { it.id.event }
@@ -63,7 +67,7 @@ class EventController(
     fun getUpcomingEventsForAllPlaces(): List<PlaceUpcomingEventDto> {
         val now = LocalDateTime.now()
 
-        val allUpcoming = eventRepository.findAllByEndAfterOrderByPlace_IdAscStartAsc(now)
+        val allUpcoming = eventRepository.findAllByEndAfterOrderByPlaceIdAscStartAsc(now)
 
         val earliestPerPlace: List<EventEntity> =
             allUpcoming
@@ -86,6 +90,6 @@ class EventController(
     @GetMapping("/events/owned-events")
     fun getMyOwnedEventsForUser(@AuthenticationPrincipal jwt: Jwt): List<EventAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
-        return eventRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
+        return eventRepository.findAllByOwnerSub(user.sub).map { it.toAdminListItemDto() }
     }
 }

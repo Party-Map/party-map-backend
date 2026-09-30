@@ -3,7 +3,7 @@ package com.partymap.backend.domain.eventplan.dto
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
 import com.partymap.backend.domain.place.dto.PlaceDto
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class EventPlanPlaceInvitationDto(val state: EventPlanPlaceInvitationState, val place: PlaceDto)
 

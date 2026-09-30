@@ -1,7 +1,7 @@
 package com.partymap.backend.domain.eventplan.dto
 
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class EventPlanLineupInvitationCreatePayloadDto(
     var performerId: UUID,

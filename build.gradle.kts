@@ -1,3 +1,4 @@
+import dev.detekt.gradle.Detekt
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,6 +7,8 @@ plugins {
     kotlin("plugin.jpa") version "2.4.20"
     id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
+    id("dev.detekt") version "2.0.0-alpha.6"
+    jacoco
 }
 
 group = "com.partymap"
@@ -43,6 +46,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    detektPlugins("dev.detekt:detekt-rules-ktlint-wrapper:2.0.0-alpha.6")
 }
 
 kotlin {
@@ -60,4 +65,69 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// detekt runs on the Kotlin version it was compiled with (2.4.10 for 2.0.0-alpha.6); the dependency-management
+// plugin would otherwise lift its Kotlin libraries to the project's 2.4.20. Only detekt's own classpath is pinned.
+configurations.matching { it.name == "detekt" }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.jetbrains.kotlin") {
+            useVersion(dev.detekt.gradle.plugin.getSupportedKotlinVersion())
+        }
+    }
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(files("config/detekt/detekt.yml"))
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "25"
+    reports {
+        html.required = true
+        sarif.required = true
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.15"
+}
+
+// Coverage counts everything except the Spring Boot entry point.
+val coverageExclusions = listOf("**/PartyMapBackendApplicationKt.class")
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    classDirectories.setFrom(classDirectories.files.map { fileTree(it) { exclude(coverageExclusions) } })
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    classDirectories.setFrom(classDirectories.files.map { fileTree(it) { exclude(coverageExclusions) } })
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                minimum = "0.90".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+    }
+}
+
+// `./gradlew check` = detekt (static analysis + ktlint formatting) + tests + the coverage gate.
+tasks.check {
+    dependsOn(tasks.named("detekt"), tasks.jacocoTestCoverageVerification)
 }

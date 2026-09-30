@@ -14,9 +14,16 @@ import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/api")
@@ -45,7 +52,7 @@ class PlaceController(
     @GetMapping("/places/owned-places")
     fun getMyPlacesForUser(@AuthenticationPrincipal jwt: Jwt): List<PlaceAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
-        return placeRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
+        return placeRepository.findAllByOwnerSub(user.sub).map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('place_manager_user')")
