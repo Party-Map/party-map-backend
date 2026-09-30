@@ -1,0 +1,12 @@
+# Only the build files, config and src are needed in the image build context.
+.git
+.github
+.gradle
+.kotlin
+.idea
+build
+docs
+keycloak
+rest
+*.md
+docker-compose*.yml

@@ -1,8 +1,8 @@
 # Party Map backend
 
-Spring Boot 3.5 / Kotlin REST API behind the Party Map frontend: places, performers, events,
-event plans with invitations, likes and search. Authentication is a Keycloak realm; the API
-validates the JWT on every protected endpoint.
+Spring Boot 4.1 / Kotlin 2.4 REST API (Java 25) behind the Party Map frontend: places, performers, events, event
+plans with invitations, likes and search. Authentication is a Keycloak realm; the API validates the bearer token and
+reads the realm roles from its `roles` claim.
 
 ## Run the dev stack with Docker
 
@@ -10,37 +10,57 @@ validates the JWT on every protected endpoint.
 docker compose up
 ```
 
-That starts, in this order: the app database, Keycloak with its own database and the `party-map`
-realm imported from `keycloak/party-map-realm.json`, and the backend in the `dev` profile (the
-schema is recreated and seeded from `src/main/resources/data.sql` on every start).
+That starts the app database (PostgreSQL 18), Keycloak 26 with its own database and the `party-map` realm imported
+from `keycloak/party-map-realm.json`, and the backend in the `dev` profile. The dev profile drops and re-creates the
+schema with Flyway on every start and then loads the demo data from `src/main/resources/db/seed/afterMigrate.sql`.
 
 | Service | URL | Credentials |
 |---|---|---|
-| Backend | http://localhost:8080/api/places | JWT from Keycloak for protected endpoints |
+| Backend | http://localhost:8080/api/places | bearer token from Keycloak for protected endpoints |
+| OpenAPI document | http://localhost:8080/api/openapi | |
 | Keycloak admin console | http://localhost:8081 | admin / adminpass |
-| Keycloak dev users (realm `party-map`) | | e2e@partymap.local / e2e-password (all manager roles); adrian@szell.dev (reset the password in the console) |
+| Keycloak dev users (realm `party-map`) | | e2e@partymap.local / e2e-password (all manager roles) |
 | PostgreSQL | localhost:5432 | partymap / partymap |
 
-The first `docker compose up` builds the backend image (Gradle runs inside Docker, a few minutes);
-later starts reuse the cached layers. Rebuild after code changes with `docker compose up --build backend`.
-
-Hot reload while coding: start only the dependencies and run the app on the host.
+Rebuild after code changes with `docker compose up --build backend`. For hot reload, start only the dependencies and
+run the app on the host (JDK 25 on `JAVA_HOME`):
 
 ```bash
 docker compose up db keycloak
 SPRING_PROFILES_ACTIVE=dev SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://localhost:8081/realms/party-map ./gradlew bootRun
 ```
 
-The frontend runs from its own folder (`docker compose up` in `../party-map-frontend`, or `pnpm dev`).
+## Quality gates
 
-## Tests
+Every change runs `./gradlew check` (Docker must be running) before it is committed; CI runs the same command and only
+then builds the image.
 
-```bash
-./gradlew test          # needs Docker running: Testcontainers starts a throwaway PostgreSQL
-./gradlew clean build   # compile + tests + jar
-```
+| Gate | Tool | Rule |
+|---|---|---|
+| Static analysis and formatting | detekt 2 with the ktlint rules (`config/detekt/detekt.yml`) | no findings; `./gradlew detekt --auto-correct` fixes formatting |
+| Tests | JUnit 6, MockMvc, spring-security-test, Testcontainers (PostgreSQL 18) | all green |
+| Coverage | JaCoCo (`build/reports/jacoco/test/html`) | lines >= 90 %, branches >= 80 %, never lowered |
 
-Integration tests use the `test` profile and `TestcontainersConfig` (`@ActiveProfiles("test") @Import(TestcontainersConfig::class)`).
+Integration tests extend `support/IntegrationTest`: a real database migrated by Flyway, MockMvc, the `TestData`
+factories and `tokenFor(sub, roles)` for bearer tokens. Tests are not transactional (requests commit as in production);
+the tables are emptied after each test. A bug fix starts with a test that fails on the old code.
+
+## Database and migrations
+
+Flyway owns the schema (`src/main/resources/db/migration`); Hibernate only validates the mapping (`ddl-auto: validate`).
+
+- `V1__baseline.sql` is the schema Hibernate generated before Flyway, as dumped from production. Production was
+  baselined at version 1 (`spring.flyway.baseline-on-migrate`), so V1 only runs on empty databases.
+- `V2__entity_fixes.sql` and later files change the schema. Never edit an applied migration; add `V<n>__what.sql`.
+- The dev seed is a Flyway `afterMigrate` callback that only the `dev` profile loads.
+
+## API conventions
+
+- Errors are RFC 9457 problem details (`application/problem+json` with `status`, `detail`, and `errors[]` of
+  `{ field, message }` for invalid bodies): 400 invalid input, 401 no or bad token, 403 wrong role or not the owner,
+  404 unknown id, 409 state conflict (already invited, not publishable yet).
+- Mutations without a result answer 204. Creating or updating returns the saved object.
+- `GET /api/places?bbox=minLon,minLat,maxLon,maxLat` returns only the places inside the map viewport.
 
 ## OpenAPI
 
@@ -51,25 +71,22 @@ The running app serves its OpenAPI 3.1 document at `/api/openapi` (springdoc). `
 ./gradlew test --tests '*OpenApiExportTest*'   # then copy build/openapi.json to ../party-map-frontend/openapi.json
 ```
 
-HTTP smoke requests for IntelliJ's HTTP client are in `rest/`.
+HTTP smoke requests for IntelliJ's HTTP client are in `rest/` (they expect the dev seed).
 
 ## Keycloak realm
 
-`keycloak/party-map-realm.json` is a full realm export (clients, roles, dev users with password
-hashes). It is imported only when the Keycloak database volume is empty; changes made in the admin
-console persist in the `keycloak-db-data` volume. To refresh the file from a running stack:
+`keycloak/party-map-realm.json` is a full realm export (clients, roles, dev users with password hashes). It is imported
+only when the Keycloak database volume is empty. To refresh the file from a running stack:
 
 ```bash
 docker compose exec keycloak /opt/keycloak/bin/kc.sh export --dir /tmp/export --realm party-map --users realm_file
 docker compose cp keycloak:/tmp/export/party-map-realm.json keycloak/party-map-realm.json
 ```
 
-Clients: `partymap` (confidential, used by the old Next.js frontend) and `partymap-web` (public,
-PKCE, used by the React single-page app). Production Keycloak is a separate instance and needs the
-same clients with the production URLs.
-
 ## Production
 
-`application.yml` reads the datasource from `SPRING_DATASOURCE_*` and validates tokens against
-`https://auth.terkep.party/realms/party-map`. CI (`.github/workflows/deploy.yml`) builds the image
-and pushes `ghcr.io/party-map/party-map-backend:latest` on every push to `main`.
+The `prod` profile allows CORS from `https://terkep.party`. The datasource comes from `SPRING_DATASOURCE_*` (or the
+`APP_DB_*` variables in `application.yml`), tokens are validated against `https://auth.terkep.party/realms/party-map`.
+CI (`.github/workflows/deploy.yml`) runs `./gradlew check` on every push and pull request and, on `main`, pushes
+`ghcr.io/party-map/party-map-backend` tagged `latest` and with the commit SHA. The image runs as a non-root user and
+reports its health through `/api/openapi`.

@@ -52,7 +52,6 @@ Thumbs.db
 # === Docker ===
 /tmp/
 docker-compose.override.yml
-.dockerignore
 
 # === Misc ===
 hs_err_pid*
