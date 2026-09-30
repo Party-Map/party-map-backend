@@ -30,39 +30,30 @@ class PerformerController(
 ) {
 
     @GetMapping("/performers")
-    fun getPerformers(): List<PerformerDto> =
-        performerRepository.findAll()
-            .map { it.toDto() }
+    fun getPerformers(): List<PerformerDto> = performerRepository.findAll()
+        .map { it.toDto() }
 
     @GetMapping("/performers/{id}")
-    fun getPerformer(@PathVariable id: UUID): PerformerDto =
-        performerRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Performer $id not found") }
-            .toDto()
+    fun getPerformer(@PathVariable id: UUID): PerformerDto = performerRepository.findById(id)
+        .orElseThrow { NoSuchElementException("Performer $id not found") }
+        .toDto()
 
     @GetMapping("/performers/liked-performers")
-    fun getLikedPerformersForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<PerformerDto> {
+    fun getLikedPerformersForUser(@AuthenticationPrincipal jwt: Jwt): List<PerformerDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return userLikesFetchService.getLikedPerformers(user.sub)
     }
 
     @PreAuthorize("hasRole('performer_manager_user')")
     @GetMapping("/performers/owned-performers")
-    fun getOwnedPerformersForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<PerformerAdminListItemDto> {
+    fun getOwnedPerformersForUser(@AuthenticationPrincipal jwt: Jwt): List<PerformerAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return performerRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('performer_manager_user')")
     @PostMapping("/performers")
-    fun createPlace(
-        @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody dto: PerformerCreateDto,
-    ): PerformerDto {
+    fun createPlace(@AuthenticationPrincipal jwt: Jwt, @RequestBody dto: PerformerCreateDto): PerformerDto {
         val user = currentUserService.getOrCreateUser(jwt)
         val entity = dto.toEntity(user)
         val saved = performerRepository.save(entity)
@@ -105,7 +96,7 @@ class PerformerController(
         if (performer.owner.sub != user.sub) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "You are not allowed to view invitations for this performer"
+                "You are not allowed to view invitations for this performer",
             )
         }
 
@@ -134,7 +125,7 @@ class PerformerController(
         if (performer.owner.sub != user.sub) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "You are not allowed to respond to invitations for this performer"
+                "You are not allowed to respond to invitations for this performer",
             )
         }
 

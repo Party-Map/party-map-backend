@@ -5,12 +5,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import java.time.LocalDateTime
 import java.util.*
 
-interface EventRepository : JpaRepository<EventEntity, UUID>, JpaSpecificationExecutor<EventEntity> {
+interface EventRepository :
+    JpaRepository<EventEntity, UUID>,
+    JpaSpecificationExecutor<EventEntity> {
     fun findAllByPlace_Id(placeId: UUID): List<EventEntity>
 
-    fun findAllByEndAfterOrderByPlace_IdAscStartAsc(
-        endAfter: LocalDateTime,
-    ): List<EventEntity>
+    fun findAllByEndAfterOrderByPlace_IdAscStartAsc(endAfter: LocalDateTime): List<EventEntity>
 
     fun findAllByLikedByUsers_Sub(sub: UUID): List<EventEntity>
 

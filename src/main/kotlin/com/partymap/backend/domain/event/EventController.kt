@@ -36,6 +36,7 @@ class EventController(
     ): List<EventDto> {
         val events = when {
             placeId != null -> eventRepository.findAllByPlace_Id(placeId)
+
             performerId != null -> performerRepository.findById(performerId).map { performerEntity ->
                 performerEntity.lineupItems.map { it.id.event }
             }.orElse(emptyList())
@@ -46,10 +47,9 @@ class EventController(
     }
 
     @GetMapping("/events/{id}")
-    fun getEvent(@PathVariable id: UUID): EventDto =
-        eventRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Event $id not found") }
-            .toDto()
+    fun getEvent(@PathVariable id: UUID): EventDto = eventRepository.findById(id)
+        .orElseThrow { NoSuchElementException("Event $id not found") }
+        .toDto()
 
     @GetMapping("/events/{id}/place")
     fun getPlaceByEventId(@PathVariable id: UUID): PlaceDto {
@@ -77,20 +77,15 @@ class EventController(
     }
 
     @GetMapping("/events/liked-events")
-    fun getLikedEventsForUser(
-        @AuthenticationPrincipal jwt: Jwt
-    ): LikedEventsGroupedDto {
+    fun getLikedEventsForUser(@AuthenticationPrincipal jwt: Jwt): LikedEventsGroupedDto {
         val user = currentUserService.getOrCreateUser(jwt)
         return userLikesFetchService.getLikedEventsGrouped(user.sub)
     }
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/events/owned-events")
-    fun getMyOwnedEventsForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<EventAdminListItemDto> {
+    fun getMyOwnedEventsForUser(@AuthenticationPrincipal jwt: Jwt): List<EventAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return eventRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
     }
-
 }

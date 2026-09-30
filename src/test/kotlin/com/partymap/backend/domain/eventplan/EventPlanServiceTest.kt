@@ -62,7 +62,7 @@ class EventPlanServiceTest {
             image = null,
             price = "one million dollars",
             kind = EventType.PUB,
-        )
+        ),
     )
 
     @Transactional
@@ -71,8 +71,8 @@ class EventPlanServiceTest {
             owner = testPerformerOwner,
             name = "Test Performer",
             genre = "Rock",
-            bio = "This is a test performer"
-        )
+            bio = "This is a test performer",
+        ),
     )
 
     @Transactional
@@ -80,7 +80,7 @@ class EventPlanServiceTest {
         val testOwner = userRepository.saveAndFlush(
             UserEntity(
                 sub = UUID.randomUUID(),
-            )
+            ),
         )
 
         return testOwner
@@ -93,13 +93,13 @@ class EventPlanServiceTest {
                 name = "Test Place",
                 location = GeoPointEmbeddable(
                     latitude = 40.7128,
-                    longitude = -74.0060
+                    longitude = -74.0060,
                 ),
                 address = "123 Test St, Test City, TC 12345",
                 city = "Test City",
                 description = "This is a test place",
                 owner = owner,
-            )
+            ),
         )
         return place
     }
@@ -167,7 +167,6 @@ class EventPlanServiceTest {
         }
     }
 
-
     @Test
     @Transactional
     fun itShouldInviteAPlace() {
@@ -179,7 +178,7 @@ class EventPlanServiceTest {
 
         eventPlanService.invitePlace(
             testEventPlan,
-            testPlace
+            testPlace,
         )
 
         val invitation = testEventPlan.placeInvitations.find { it.id.place.id == testPlace.id }
@@ -201,7 +200,7 @@ class EventPlanServiceTest {
 
         eventPlanService.invitePlace(
             testEventPlan,
-            testPlace1
+            testPlace1,
         )
 
         val invitation = testEventPlan.placeInvitations.find { it.id.place.id == testPlace1.id }
@@ -210,7 +209,7 @@ class EventPlanServiceTest {
 
         eventPlanService.invitePlace(
             testEventPlan,
-            testPlace2
+            testPlace2,
         )
 
         val invitation2 = testEventPlan.placeInvitations.find { it.id.place.id == testPlace2.id }
@@ -248,7 +247,7 @@ class EventPlanServiceTest {
                 price = "small loan of a million dollars",
                 kind = EventType.PUB,
                 image = null,
-            )
+            ),
         )
 
         // Invite three performers
@@ -344,7 +343,7 @@ class EventPlanServiceTest {
                 price = "small loan of a million dollars",
                 kind = EventType.PUB,
                 image = null,
-            )
+            ),
         )
 
         // Invite three performers, then explicitly set all possible states
@@ -413,7 +412,7 @@ class EventPlanServiceTest {
                 price = "small loan of a million dollars",
                 kind = EventType.PUB,
                 image = null,
-            )
+            ),
         )
 
         // Invite three performers
@@ -427,13 +426,13 @@ class EventPlanServiceTest {
             eventPlan,
             performer2,
             start.plusMinutes(30),
-            start.plusMinutes(60)
+            start.plusMinutes(60),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
             start.plusMinutes(60),
-            start.plusMinutes(90)
+            start.plusMinutes(90),
         )
 
         // Set lineup invitation states: all non‑pending (so the only problem is missing place)
@@ -481,7 +480,7 @@ class EventPlanServiceTest {
                 price = "small loan of a million dollars",
                 kind = EventType.PUB,
                 image = null,
-            )
+            ),
         )
 
         // Invite three performers
@@ -489,19 +488,19 @@ class EventPlanServiceTest {
             eventPlan,
             performer1,
             start,
-            start.plusMinutes(30)
+            start.plusMinutes(30),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer2,
             start.plusMinutes(30),
-            start.plusMinutes(60)
+            start.plusMinutes(60),
         )
         eventPlanService.invitePerformer(
             eventPlan,
             performer3,
             start.plusMinutes(60),
-            start.plusMinutes(90)
+            start.plusMinutes(90),
         )
 
         // All lineup invitations non‑pending (so only the place is invalid)

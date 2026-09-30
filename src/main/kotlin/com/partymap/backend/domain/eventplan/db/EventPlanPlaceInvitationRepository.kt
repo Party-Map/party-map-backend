@@ -10,14 +10,14 @@ interface EventPlanPlaceInvitationRepository :
 
     @Query(
         "SELECT e FROM EventPlanPlaceInvitationEntity e " +
-                "WHERE e.id.place.id = :placeId"
+            "WHERE e.id.place.id = :placeId",
     )
     fun findAllByPlaceId(@Param("placeId") placeId: UUID): List<EventPlanPlaceInvitationEntity>
 
     @Query(
         "SELECT e FROM EventPlanPlaceInvitationEntity e " +
-                "WHERE e.id.place.id = :placeId " +
-                "AND e.id.eventPlan.id = :eventPlanId"
+            "WHERE e.id.place.id = :placeId " +
+            "AND e.id.eventPlan.id = :eventPlanId",
     )
     fun findByPlaceIdAndEventPlanId(
         @Param("placeId") placeId: UUID,

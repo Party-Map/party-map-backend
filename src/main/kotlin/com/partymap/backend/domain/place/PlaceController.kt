@@ -27,39 +27,30 @@ class PlaceController(
     private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
 ) {
     @GetMapping("/places")
-    fun getPlaces(): List<PlaceDto> =
-        placeRepository.findAll()
-            .map { it.toDto() }
+    fun getPlaces(): List<PlaceDto> = placeRepository.findAll()
+        .map { it.toDto() }
 
     @GetMapping("/places/{id}")
-    fun getPlace(@PathVariable id: UUID): PlaceDto =
-        placeRepository.findById(id)
-            .orElseThrow { NoSuchElementException("Place $id not found") }
-            .toDto()
+    fun getPlace(@PathVariable id: UUID): PlaceDto = placeRepository.findById(id)
+        .orElseThrow { NoSuchElementException("Place $id not found") }
+        .toDto()
 
     @GetMapping("/places/liked-places")
-    fun getLikedPlacesForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<PlaceDto> {
+    fun getLikedPlacesForUser(@AuthenticationPrincipal jwt: Jwt): List<PlaceDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return userLikesFetchService.getLikedPlaces(user.sub)
     }
 
     @PreAuthorize("hasRole('place_manager_user')")
     @GetMapping("/places/owned-places")
-    fun getMyPlacesForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<PlaceAdminListItemDto> {
+    fun getMyPlacesForUser(@AuthenticationPrincipal jwt: Jwt): List<PlaceAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return placeRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('place_manager_user')")
     @PostMapping("/places")
-    fun createPlace(
-        @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody dto: PlaceCreateDto,
-    ): PlaceDto {
+    fun createPlace(@AuthenticationPrincipal jwt: Jwt, @RequestBody dto: PlaceCreateDto): PlaceDto {
         val user = currentUserService.getOrCreateUser(jwt)
         val entity = dto.toEntity(user)
         val saved = placeRepository.save(entity)
@@ -129,7 +120,7 @@ class PlaceController(
         if (place.owner.sub != user.sub) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "You are not allowed to manage invitations for this place"
+                "You are not allowed to manage invitations for this place",
             )
         }
 

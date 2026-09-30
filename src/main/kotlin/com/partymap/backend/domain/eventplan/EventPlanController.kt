@@ -28,14 +28,11 @@ class EventPlanController(
     private val currentUserService: CurrentUserService,
     private val eventPlanRepository: EventPlanRepository,
     private val eventPlanService: EventPlanService,
-    private val performerRepository: PerformerRepository
+    private val performerRepository: PerformerRepository,
 ) {
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/{id}")
-    fun getEventPlan(
-        @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable id: UUID,
-    ): EventPlanDto {
+    fun getEventPlan(@AuthenticationPrincipal jwt: Jwt, @PathVariable id: UUID): EventPlanDto {
         val user = currentUserService.getOrCreateUser(jwt)
 
         val eventPlan = eventPlanRepository.findById(id)
@@ -50,28 +47,21 @@ class EventPlanController(
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/places")
-    fun getPlacesForEventPlanList(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<PlaceAdminListItemDto> {
+    fun getPlacesForEventPlanList(@AuthenticationPrincipal jwt: Jwt): List<PlaceAdminListItemDto> {
         currentUserService.getOrCreateUser(jwt)
         return placeRepository.findAll().map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/owned-event-plans")
-    fun getMyOwnedEventsForUser(
-        @AuthenticationPrincipal jwt: Jwt,
-    ): List<EventPlanAdminListItemDto> {
+    fun getMyOwnedEventsForUser(@AuthenticationPrincipal jwt: Jwt): List<EventPlanAdminListItemDto> {
         val user = currentUserService.getOrCreateUser(jwt)
         return eventPlanRepository.findAllByOwner_Sub(user.sub).map { it.toAdminListItemDto() }
     }
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @PostMapping("/event-plan")
-    fun createPlace(
-        @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody dto: EventPlanCreateDto,
-    ): EventPlanDto {
+    fun createPlace(@AuthenticationPrincipal jwt: Jwt, @RequestBody dto: EventPlanCreateDto): EventPlanDto {
         val user = currentUserService.getOrCreateUser(jwt)
         val entity = dto.toEntity(user)
         val saved = eventPlanRepository.save(entity)
@@ -142,7 +132,7 @@ class EventPlanController(
         if (place.owner.sub != user.sub) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "You are not allowed to manage invitations for this place"
+                "You are not allowed to manage invitations for this place",
             )
         }
 
@@ -158,7 +148,7 @@ class EventPlanController(
         } else {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "No invitation found for place $placeId in event plan $id"
+                "No invitation found for place $placeId in event plan $id",
             )
         }
 
@@ -166,7 +156,6 @@ class EventPlanController(
 
         return HttpStatus.OK
     }
-
 
     @PreAuthorize("hasRole('event_organizer_user')")
     @GetMapping("/event-plan/{id}/lineup-invitations")
@@ -240,7 +229,7 @@ class EventPlanController(
         if (!removed) {
             throw ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "Lineup invitation for performer $performerId not found in event plan $id"
+                "Lineup invitation for performer $performerId not found in event plan $id",
             )
         }
 
@@ -251,10 +240,7 @@ class EventPlanController(
     @PreAuthorize("hasRole('event_organizer_user')")
     @PostMapping("/event-plan/{id}/publish")
     @Transactional
-    fun publishEventPlan(
-        @AuthenticationPrincipal jwt: Jwt,
-        @PathVariable id: UUID,
-    ): HttpStatus {
+    fun publishEventPlan(@AuthenticationPrincipal jwt: Jwt, @PathVariable id: UUID): HttpStatus {
         val user = currentUserService.getOrCreateUser(jwt)
 
         val eventPlan = eventPlanRepository.findById(id)
@@ -263,7 +249,7 @@ class EventPlanController(
         if (eventPlan.owner.sub != user.sub) {
             throw ResponseStatusException(
                 HttpStatus.FORBIDDEN,
-                "You are not allowed to publish this event plan"
+                "You are not allowed to publish this event plan",
             )
         }
 
@@ -277,6 +263,4 @@ class EventPlanController(
 
         return HttpStatus.OK
     }
-
-
 }

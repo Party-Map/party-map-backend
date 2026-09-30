@@ -10,7 +10,5 @@ import org.springframework.web.bind.annotation.RestController
 class SearchController(private val searchService: SearchService) {
 
     @GetMapping("/search")
-    fun search(@RequestParam q: String): SearchResponseDto =
-        searchService.search(q)
-
+    fun search(@RequestParam q: String): SearchResponseDto = searchService.search(q)
 }

@@ -22,7 +22,4 @@ data class SearchHitDto(
     val placeId: UUID?,
 )
 
-data class SearchResponseDto(
-    val query: String,
-    val hits: List<SearchHitDto>,
-)
+data class SearchResponseDto(val query: String, val hits: List<SearchHitDto>)

@@ -30,7 +30,7 @@ class PlaceEntity(
     @ElementCollection
     @CollectionTable(
         name = "place_tags",
-        joinColumns = [JoinColumn(name = "place_id")]
+        joinColumns = [JoinColumn(name = "place_id")],
     )
     @Column(nullable = false)
     var tags: MutableSet<String> = mutableSetOf(),
@@ -38,7 +38,7 @@ class PlaceEntity(
     @ElementCollection
     @CollectionTable(
         name = "place_links",
-        joinColumns = [JoinColumn(name = "place_id")]
+        joinColumns = [JoinColumn(name = "place_id")],
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 

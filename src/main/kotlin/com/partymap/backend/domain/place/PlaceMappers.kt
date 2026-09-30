@@ -1,6 +1,5 @@
 package com.partymap.backend.domain.place
 
-
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.common.dto.GeoPointDto
@@ -13,21 +12,20 @@ import com.partymap.backend.domain.search.SearchHitDto
 import com.partymap.backend.domain.search.SearchHitType
 import com.partymap.backend.domain.user.UserEntity
 
-fun PlaceEntity.toDto(): PlaceDto =
-    PlaceDto(
-        id = id!!,
-        name = name,
-        location = GeoPointDto(
-            latitude = location.latitude,
-            longitude = location.longitude,
-        ),
-        address = address,
-        city = city,
-        description = description,
-        image = image,
-        tags = tags.toList(),
-        links = links.map { LinkDto(it.type, it.url) },
-    )
+fun PlaceEntity.toDto(): PlaceDto = PlaceDto(
+    id = id!!,
+    name = name,
+    location = GeoPointDto(
+        latitude = location.latitude,
+        longitude = location.longitude,
+    ),
+    address = address,
+    city = city,
+    description = description,
+    image = image,
+    tags = tags.toList(),
+    links = links.map { LinkDto(it.type, it.url) },
+)
 
 fun PlaceEntity.toSearchHitDto(): SearchHitDto {
     val subtitle = buildString {
@@ -49,35 +47,31 @@ fun PlaceEntity.toSearchHitDto(): SearchHitDto {
     )
 }
 
-fun GeoPointDto.toEmbeddable() =
-    GeoPointEmbeddable(latitude = latitude, longitude = longitude)
+fun GeoPointDto.toEmbeddable() = GeoPointEmbeddable(latitude = latitude, longitude = longitude)
 
+fun PlaceCreateDto.toEntity(owner: UserEntity): PlaceEntity = PlaceEntity(
+    name = name,
+    location = location.toEmbeddable(),
+    address = address,
+    city = city,
+    description = description,
+    image = image,
+    tags = (tags ?: emptyList()).toMutableSet(),
+    links = (links ?: emptyList()).map {
+        LinkEmbeddable(
+            type = it.type,
+            url = it.url,
+        )
+    }.toMutableList(),
+    owner = owner,
+)
 
-fun PlaceCreateDto.toEntity(owner: UserEntity): PlaceEntity =
-    PlaceEntity(
-        name = name,
-        location = location.toEmbeddable(),
-        address = address,
-        city = city,
-        description = description,
-        image = image,
-        tags = (tags ?: emptyList()).toMutableSet(),
-        links = (links ?: emptyList()).map {
-            LinkEmbeddable(
-                type = it.type,
-                url = it.url,
-            )
-        }.toMutableList(),
-        owner = owner,
-    )
-
-fun PlaceEntity.toAdminListItemDto(): PlaceAdminListItemDto =
-    PlaceAdminListItemDto(
-        id = this.id!!,
-        name = this.name,
-        address = this.address,
-        city = this.city,
-    )
+fun PlaceEntity.toAdminListItemDto(): PlaceAdminListItemDto = PlaceAdminListItemDto(
+    id = this.id!!,
+    name = this.name,
+    address = this.address,
+    city = this.city,
+)
 
 fun PlaceEntity.updateFromDto(dto: PlaceCreateDto) {
     name = dto.name

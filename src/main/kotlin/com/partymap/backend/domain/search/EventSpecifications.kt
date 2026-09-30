@@ -42,8 +42,8 @@ object EventSpecifications {
             val anyFieldMatches = cb.or(*predicates.toTypedArray())
 
             cb.and(
-                futurePredicate,      // only events whose end is in the future
-                anyFieldMatches
+                futurePredicate, // only events whose end is in the future
+                anyFieldMatches,
             )
         }
     }

@@ -12,9 +12,7 @@ abstract class AbstractLikeService<E : BaseEntity>(
 ) {
 
     @Transactional(readOnly = true)
-    open fun isLiked(user: UserEntity, entityId: UUID): Boolean {
-        return getLikedCollection(user).any { it.id == entityId }
-    }
+    open fun isLiked(user: UserEntity, entityId: UUID): Boolean = getLikedCollection(user).any { it.id == entityId }
 
     @Transactional
     open fun like(user: UserEntity, entityId: UUID) {

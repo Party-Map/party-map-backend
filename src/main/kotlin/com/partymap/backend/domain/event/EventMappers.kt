@@ -11,20 +11,19 @@ import com.partymap.backend.domain.performer.toDto
 import com.partymap.backend.domain.search.SearchHitDto
 import com.partymap.backend.domain.search.SearchHitType
 
-fun EventEntity.toDto(): EventDto =
-    EventDto(
-        id = id!!,
-        title = title,
-        placeId = place.id!!,
-        description = description,
-        start = start,
-        end = end,
-        image = image,
-        lineupItems = lineupItems.map { it.toDto() },
-        price = price,
-        kind = kind,
-        links = links.map { LinkDto(it.type, it.url) },
-    )
+fun EventEntity.toDto(): EventDto = EventDto(
+    id = id!!,
+    title = title,
+    placeId = place.id!!,
+    description = description,
+    start = start,
+    end = end,
+    image = image,
+    lineupItems = lineupItems.map { it.toDto() },
+    price = price,
+    kind = kind,
+    links = links.map { LinkDto(it.type, it.url) },
+)
 
 fun EventEntity.toPlaceUpcomingEventDto(): PlaceUpcomingEventDto {
     val fallbackImage = this.place.image
@@ -39,7 +38,6 @@ fun EventEntity.toPlaceUpcomingEventDto(): PlaceUpcomingEventDto {
         kind = this.kind,
     )
 }
-
 
 fun EventEntity.toSearchHitDto(): SearchHitDto {
     val place = this.place
@@ -63,18 +61,16 @@ fun EventEntity.toSearchHitDto(): SearchHitDto {
     )
 }
 
-fun EventEntity.toAdminListItemDto(): EventAdminListItemDto =
-    EventAdminListItemDto(
-        id = id!!,
-        title = title,
-        start = start,
-        end = end,
-        placeName = place.name,
-    )
+fun EventEntity.toAdminListItemDto(): EventAdminListItemDto = EventAdminListItemDto(
+    id = id!!,
+    title = title,
+    start = start,
+    end = end,
+    placeName = place.name,
+)
 
-fun EventLineupItemEntity.toDto(): EventLineupItemDto =
-    EventLineupItemDto(
-        startTime = startTime,
-        endTime = endTime,
-        performer = id.performer.toDto()
-    )
+fun EventLineupItemEntity.toDto(): EventLineupItemDto = EventLineupItemDto(
+    startTime = startTime,
+    endTime = endTime,
+    performer = id.performer.toDto(),
+)

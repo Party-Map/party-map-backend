@@ -6,17 +6,12 @@ import jakarta.persistence.criteria.Predicate
 
 object SearchUtils {
 
-    fun prepareKeywords(rawQuery: String): List<String> =
-        rawQuery.trim()
-            .lowercase()
-            .split(Regex("\\s+"))
-            .filter { it.isNotBlank() }
+    fun prepareKeywords(rawQuery: String): List<String> = rawQuery.trim()
+        .lowercase()
+        .split(Regex("\\s+"))
+        .filter { it.isNotBlank() }
 
-    fun andKeywordsLike(
-        cb: CriteriaBuilder,
-        expression: Expression<String>,
-        keywords: List<String>
-    ): Predicate {
+    fun andKeywordsLike(cb: CriteriaBuilder, expression: Expression<String>, keywords: List<String>): Predicate {
         val preds = keywords.map { kw ->
             cb.like(cb.lower(expression), "%$kw%")
         }

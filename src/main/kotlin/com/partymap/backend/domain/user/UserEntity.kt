@@ -29,7 +29,7 @@ class UserEntity(
     @JoinTable(
         name = "user_liked_events",
         joinColumns = [JoinColumn(name = "user_sub")],
-        inverseJoinColumns = [JoinColumn(name = "event_id")]
+        inverseJoinColumns = [JoinColumn(name = "event_id")],
     )
     var likedEvents: MutableSet<EventEntity> = mutableSetOf(),
 
@@ -37,7 +37,7 @@ class UserEntity(
     @JoinTable(
         name = "user_liked_places",
         joinColumns = [JoinColumn(name = "user_sub")],
-        inverseJoinColumns = [JoinColumn(name = "place_id")]
+        inverseJoinColumns = [JoinColumn(name = "place_id")],
     )
     var likedPlaces: MutableSet<PlaceEntity> = mutableSetOf(),
 
@@ -45,7 +45,7 @@ class UserEntity(
     @JoinTable(
         name = "user_liked_performers",
         joinColumns = [JoinColumn(name = "user_sub")],
-        inverseJoinColumns = [JoinColumn(name = "performer_id")]
+        inverseJoinColumns = [JoinColumn(name = "performer_id")],
     )
     var likedPerformers: MutableSet<PerformerEntity> = mutableSetOf(),
 )

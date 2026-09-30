@@ -40,14 +40,14 @@ class EventEntity(
         mappedBy = "id.event",
         cascade = [CascadeType.ALL],
         orphanRemoval = true,
-        fetch = FetchType.EAGER
+        fetch = FetchType.EAGER,
     )
     var lineupItems: MutableList<EventLineupItemEntity> = mutableListOf(),
 
     @ElementCollection
     @CollectionTable(
         name = "event_links",
-        joinColumns = [JoinColumn(name = "event_id")]
+        joinColumns = [JoinColumn(name = "event_id")],
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 

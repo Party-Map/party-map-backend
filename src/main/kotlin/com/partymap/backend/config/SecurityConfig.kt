@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
 
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
@@ -31,9 +30,7 @@ class SecurityConfig {
     }
 
     @Bean
-    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults {
-        return GrantedAuthorityDefaults("")
-    }
+    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults = GrantedAuthorityDefaults("")
 
     // https://www.baeldung.com/spring-security-map-authorities-jwt
     @Bean

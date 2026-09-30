@@ -17,7 +17,7 @@ import java.util.*
 class UserLikesFetchService(
     private val eventRepository: EventRepository,
     private val placeRepository: PlaceRepository,
-    private val performerRepository: PerformerRepository
+    private val performerRepository: PerformerRepository,
 ) {
     fun getLikedEventsGrouped(sub: UUID): LikedEventsGroupedDto {
         val events = eventRepository.findAllByLikedByUsers_Sub(sub)
@@ -40,11 +40,9 @@ class UserLikesFetchService(
         )
     }
 
-    fun getLikedPlaces(sub: UUID): List<PlaceDto> =
-        placeRepository.findAllByLikedByUsers_Sub(sub)
-            .map { it.toDto() }
+    fun getLikedPlaces(sub: UUID): List<PlaceDto> = placeRepository.findAllByLikedByUsers_Sub(sub)
+        .map { it.toDto() }
 
-    fun getLikedPerformers(sub: UUID): List<PerformerDto> =
-        performerRepository.findAllByLikedByUsers_Sub(sub)
-            .map { it.toDto() }
+    fun getLikedPerformers(sub: UUID): List<PerformerDto> = performerRepository.findAllByLikedByUsers_Sub(sub)
+        .map { it.toDto() }
 }

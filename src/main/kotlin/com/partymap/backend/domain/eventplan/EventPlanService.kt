@@ -20,21 +20,20 @@ import java.time.LocalDateTime
 class EventPlanService(
     private val eventPlanRepository: EventPlanRepository,
     private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
-    private val eventRepository: EventRepository
+    private val eventRepository: EventRepository,
 ) {
 
     @Transactional
     @Throws(
         AlreadyInvitedPerformerException::class,
-        InvalidStartOrEndTimeException::class
+        InvalidStartOrEndTimeException::class,
     )
     fun invitePerformer(
         eventPlan: EventPlanEntity,
         performer: PerformerEntity,
         startTime: LocalDateTime,
-        endTime: LocalDateTime
+        endTime: LocalDateTime,
     ) {
-
         // Check if performer was already invited
         if (eventPlan.lineupInvitations.any { it.id.performer == performer }) {
             throw AlreadyInvitedPerformerException()
@@ -48,14 +47,13 @@ class EventPlanService(
             EventPlanLineupInvitationEntity(
                 id = EventPlanLineupItemId(eventPlan, performer),
                 startTime = startTime,
-                endTime = endTime
-            )
+                endTime = endTime,
+            ),
         )
     }
 
     @Transactional
     fun invitePlace(eventPlan: EventPlanEntity, place: PlaceEntity) {
-
         // Delete invitation if that already exists
         if (eventPlan.placeInvitations.size == 1) {
             val existingInvitation = eventPlan.placeInvitations[0]
@@ -65,15 +63,15 @@ class EventPlanService(
 
         eventPlan.placeInvitations.add(
             EventPlanPlaceInvitationEntity(
-                id = EventPlanPlaceInvitationEntityId(eventPlan, place)
-            )
+                id = EventPlanPlaceInvitationEntityId(eventPlan, place),
+            ),
         )
     }
 
     @Transactional
     @Throws(
         NoValidPlaceInvitationException::class,
-        PendingLineupInvitationException::class
+        PendingLineupInvitationException::class,
     )
     fun publish(user: UserEntity, eventPlan: EventPlanEntity) {
         // Check if there is a place who accepted the invitation
@@ -85,7 +83,6 @@ class EventPlanService(
         if (eventPlan.lineupInvitations.any { it.state == EventPlanLineupInvitationState.PENDING }) {
             throw PendingLineupInvitationException()
         }
-
 
         val event = eventRepository.save(
             EventEntity(
@@ -99,7 +96,7 @@ class EventPlanService(
                 links = eventPlan.links,
                 place = eventPlan.placeInvitations.first().id.place,
                 owner = user,
-            )
+            ),
         )
 
         event.lineupItems = eventPlan.lineupInvitations.filter { it.state == EventPlanLineupInvitationState.ACCEPTED }
@@ -107,10 +104,10 @@ class EventPlanService(
                 EventLineupItemEntity(
                     id = EventLineupItemId(
                         event = event,
-                        performer = it.id.performer
+                        performer = it.id.performer,
                     ),
                     startTime = it.startTime,
-                    endTime = it.endTime
+                    endTime = it.endTime,
                 )
             }.toMutableList()
 
@@ -124,7 +121,9 @@ class EventPlanService(
         newState: EventPlanLineupInvitationState,
     ) {
         val invitation = eventPlan.lineupInvitations.firstOrNull { it.id.performer.id == performer.id }
-            ?: throw IllegalArgumentException("Lineup invitation for performer ${performer.id} not found in event plan ${eventPlan.id}")
+            ?: throw IllegalArgumentException(
+                "Lineup invitation for performer ${performer.id} not found in event plan ${eventPlan.id}",
+            )
 
         invitation.state = newState
 

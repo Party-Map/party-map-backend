@@ -1,17 +1,17 @@
 package com.partymap.backend
 
-import tools.jackson.databind.json.JsonMapper
-import tools.jackson.databind.SerializationFeature
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import tools.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -23,10 +23,7 @@ import java.nio.file.Path
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Import(TestcontainersConfig::class)
-class OpenApiExportTest @Autowired constructor(
-    private val mockMvc: MockMvc,
-    private val objectMapper: JsonMapper,
-) {
+class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, private val objectMapper: JsonMapper) {
     @Test
     fun `serves the OpenAPI document for every controller and exports it`() {
         val body = mockMvc.get("/api/openapi")
@@ -47,6 +44,9 @@ class OpenApiExportTest @Autowired constructor(
 
         val out = Path.of("build", "openapi.json")
         Files.createDirectories(out.parent)
-        Files.writeString(out, objectMapper.writer().with(SerializationFeature.INDENT_OUTPUT).writeValueAsString(document) + "\n")
+        Files.writeString(
+            out,
+            objectMapper.writer().with(SerializationFeature.INDENT_OUTPUT).writeValueAsString(document) + "\n",
+        )
     }
 }

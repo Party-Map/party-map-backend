@@ -47,4 +47,4 @@ class EventPlanEntity(
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     var owner: UserEntity,
 
-    ) : BaseEntity()
+) : BaseEntity()

@@ -25,7 +25,7 @@ class PerformerEntity(
     @ElementCollection
     @CollectionTable(
         name = "performer_links",
-        joinColumns = [JoinColumn(name = "performer_id")]
+        joinColumns = [JoinColumn(name = "performer_id")],
     )
     var links: MutableList<LinkEmbeddable> = mutableListOf(),
 

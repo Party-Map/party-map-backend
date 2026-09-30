@@ -20,7 +20,7 @@ class SearchService(
         if (query.isBlank()) {
             return SearchResponseDto(
                 query = query,
-                hits = emptyList()
+                hits = emptyList(),
             )
         }
 
@@ -42,7 +42,7 @@ class SearchService(
 
         return SearchResponseDto(
             query = query,
-            hits = hits
+            hits = hits,
         )
     }
 }

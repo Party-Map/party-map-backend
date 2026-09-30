@@ -13,5 +13,4 @@ class PartyMapBackendApplicationTests {
     @Test
     fun contextLoads() {
     }
-
 }

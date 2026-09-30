@@ -20,89 +20,60 @@ class LikeController(
 ) {
 
     @GetMapping("/events/{eventId}")
-    fun isEventLiked(
-        @PathVariable eventId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun isEventLiked(@PathVariable eventId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         return LikeStatusDto(eventLikeService.isLiked(user, eventId))
     }
 
     @PutMapping("/events/{eventId}")
-    fun likeEvent(
-        @PathVariable eventId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun likeEvent(@PathVariable eventId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         eventLikeService.like(user, eventId)
         return LikeStatusDto(liked = true)
     }
 
     @DeleteMapping("/events/{eventId}")
-    fun unlikeEvent(
-        @PathVariable eventId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun unlikeEvent(@PathVariable eventId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         eventLikeService.unlike(user, eventId)
         return LikeStatusDto(liked = false)
     }
 
-
     @GetMapping("/places/{placeId}")
-    fun isPlaceLiked(
-        @PathVariable placeId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun isPlaceLiked(@PathVariable placeId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         return LikeStatusDto(placeLikeService.isLiked(user, placeId))
     }
 
     @PutMapping("/places/{placeId}")
-    fun likePlace(
-        @PathVariable placeId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun likePlace(@PathVariable placeId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         placeLikeService.like(user, placeId)
         return LikeStatusDto(liked = true)
     }
 
     @DeleteMapping("/places/{placeId}")
-    fun unlikePlace(
-        @PathVariable placeId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun unlikePlace(@PathVariable placeId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         placeLikeService.unlike(user, placeId)
         return LikeStatusDto(liked = false)
     }
 
-
     @GetMapping("/performers/{performerId}")
-    fun isPerformerLiked(
-        @PathVariable performerId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun isPerformerLiked(@PathVariable performerId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         return LikeStatusDto(performerLikeService.isLiked(user, performerId))
     }
 
     @PutMapping("/performers/{performerId}")
-    fun likePerformer(
-        @PathVariable performerId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun likePerformer(@PathVariable performerId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         performerLikeService.like(user, performerId)
         return LikeStatusDto(liked = true)
     }
 
     @DeleteMapping("/performers/{performerId}")
-    fun unlikePerformer(
-        @PathVariable performerId: UUID,
-        @AuthenticationPrincipal jwt: Jwt,
-    ): LikeStatusDto {
+    fun unlikePerformer(@PathVariable performerId: UUID, @AuthenticationPrincipal jwt: Jwt): LikeStatusDto {
         val user = currentUserService.getOrCreateUser(jwt)
         performerLikeService.unlike(user, performerId)
         return LikeStatusDto(liked = false)

@@ -22,5 +22,5 @@ data class EventLineupItemId(
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    var performer: PerformerEntity
+    var performer: PerformerEntity,
 ) : Serializable

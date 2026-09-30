@@ -24,5 +24,5 @@ data class EventPlanLineupItemId(
     var eventPlan: EventPlanEntity,
 
     @ManyToOne
-    var performer: PerformerEntity
+    var performer: PerformerEntity,
 ) : Serializable

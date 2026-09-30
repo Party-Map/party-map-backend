@@ -14,12 +14,11 @@ class EventPlanPlaceInvitationEntity(
     var state: EventPlanPlaceInvitationState = EventPlanPlaceInvitationState.PENDING,
 )
 
-
 @Embeddable
 data class EventPlanPlaceInvitationEntityId(
     @ManyToOne
     var eventPlan: EventPlanEntity,
 
     @ManyToOne
-    var place: PlaceEntity
+    var place: PlaceEntity,
 ) : Serializable

@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class CurrentUserService(
-    private val userRepository: UserRepository,
-) {
+class CurrentUserService(private val userRepository: UserRepository) {
     @Transactional
     fun getOrCreateUser(jwt: Jwt): UserEntity {
         val sub = UUID.fromString(jwt.subject)
@@ -17,7 +15,7 @@ class CurrentUserService(
             userRepository.save(
                 UserEntity(
                     sub = sub,
-                )
+                ),
             )
         }
     }

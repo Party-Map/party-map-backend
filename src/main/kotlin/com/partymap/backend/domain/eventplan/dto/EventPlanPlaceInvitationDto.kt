@@ -5,10 +5,7 @@ import com.partymap.backend.domain.place.dto.PlaceDto
 import java.time.LocalDateTime
 import java.util.*
 
-data class EventPlanPlaceInvitationDto(
-    val state: EventPlanPlaceInvitationState,
-    val place: PlaceDto,
-)
+data class EventPlanPlaceInvitationDto(val state: EventPlanPlaceInvitationState, val place: PlaceDto)
 
 data class EventPlanPlaceInvitationWithDateDto(
     val eventPlanId: UUID,
