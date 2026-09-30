@@ -35,6 +35,9 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:3.1.1")
+    // springdoc builds schemas with swagger-core, which still uses Jackson 2: its Kotlin module marks non-null
+    // properties as required in the OpenAPI document (the app itself serializes with Jackson 3).
+    runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("org.postgresql:postgresql")
 
     developmentOnly("org.springframework.boot:spring-boot-devtools")

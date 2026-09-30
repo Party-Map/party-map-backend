@@ -43,6 +43,10 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
         )
         assertEquals(emptySet<String>(), expected - paths, "missing paths")
         assertFalse(paths.any { it.endsWith("/set-status") }, "the removed set-status endpoint is still documented")
+        // Non-null Kotlin properties are required: the frontend's generated types depend on it.
+        val placeRequired = document.path("components").path("schemas").path("PlaceDto").path("required")
+            .values().map { it.asString() }.toSet()
+        assertEquals(setOf("id", "name", "location", "address", "city", "tags", "links"), placeRequired)
 
         val out = Path.of("build", "openapi.json")
         Files.createDirectories(out.parent)
