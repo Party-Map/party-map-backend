@@ -1,7 +1,8 @@
 package com.partymap.backend.domain.eventplan
 
-import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.common.dto.LinkDto
+import com.partymap.backend.domain.common.dto.toDto
+import com.partymap.backend.domain.common.dto.toEmbeddables
+import com.partymap.backend.domain.common.trimToNull
 import com.partymap.backend.domain.eventplan.db.EventPlanEntity
 import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationEntity
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntity
@@ -11,12 +12,13 @@ import com.partymap.backend.domain.eventplan.dto.EventPlanDto
 import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationDto
 import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationForPerformerDto
 import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationWithDateDto
 import com.partymap.backend.domain.performer.toDto
 import com.partymap.backend.domain.place.toDto
 import com.partymap.backend.domain.user.UserEntity
 
 fun EventPlanEntity.toDto(): EventPlanDto = EventPlanDto(
-    id = id!!,
+    id = requiredId,
     title = title,
     description = description,
     startDateTime = startDateTime,
@@ -24,69 +26,67 @@ fun EventPlanEntity.toDto(): EventPlanDto = EventPlanDto(
     image = image,
     price = price,
     kind = kind,
-    links = links.map { LinkDto(it.type, it.url) },
-    placeInvitation = placeInvitations.map { it.toDto() }.getOrNull(0),
+    links = links.map { it.toDto() },
+    placeInvitation = placeInvitation?.toDto(),
     lineupInvitations = lineupInvitations.map { it.toDto() },
 )
 
 fun EventPlanEntity.toAdminListItemDto(): EventPlanAdminListItemDto = EventPlanAdminListItemDto(
-    id = id!!,
+    id = requiredId,
     title = title,
     startDateTime = startDateTime,
     endDateTime = endDateTime,
 )
 
 fun EventPlanCreateDto.toEntity(owner: UserEntity): EventPlanEntity = EventPlanEntity(
-    title = title,
-    kind = kind,
+    title = title.trim(),
     description = description,
-    image = image,
     startDateTime = startDateTime,
     endDateTime = endDateTime,
-    price = price,
-    links = (links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList(),
+    image = image.trimToNull(),
+    price = price.trimToNull(),
+    kind = kind,
+    links = links.toEmbeddables(),
     owner = owner,
 )
 
 fun EventPlanEntity.updateFromDto(dto: EventPlanCreateDto) {
-    title = dto.title
-    kind = dto.kind
+    title = dto.title.trim()
     description = dto.description
-    image = dto.image
     startDateTime = dto.startDateTime
     endDateTime = dto.endDateTime
-    price = dto.price
-    links = (dto.links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList()
+    image = dto.image.trimToNull()
+    price = dto.price.trimToNull()
+    kind = dto.kind
+    links.clear()
+    links.addAll(dto.links.toEmbeddables())
 }
 
-fun EventPlanPlaceInvitationEntity.toDto(): EventPlanPlaceInvitationDto = EventPlanPlaceInvitationDto(
-    state = state,
-    place = id.place.toDto(),
-)
+fun EventPlanPlaceInvitationEntity.toDto(): EventPlanPlaceInvitationDto =
+    EventPlanPlaceInvitationDto(state = state, place = id.place.toDto())
+
+fun EventPlanPlaceInvitationEntity.toWithDateDto(): EventPlanPlaceInvitationWithDateDto =
+    EventPlanPlaceInvitationWithDateDto(
+        eventPlanId = id.eventPlan.requiredId,
+        state = state,
+        title = id.eventPlan.title,
+        startDateTime = id.eventPlan.startDateTime,
+        endDateTime = id.eventPlan.endDateTime,
+    )
 
 fun EventPlanLineupInvitationEntity.toDto(): EventPlanLineupInvitationDto = EventPlanLineupInvitationDto(
     state = state,
-    performer = id.performer.toDto(),
     startTime = startTime,
     endTime = endTime,
+    performer = id.performer.toDto(),
 )
 
 fun EventPlanLineupInvitationEntity.toForPerformerDto(): EventPlanLineupInvitationForPerformerDto =
     EventPlanLineupInvitationForPerformerDto(
-        eventPlanId = id.eventPlan.id!!,
+        eventPlanId = id.eventPlan.requiredId,
         eventPlanTitle = id.eventPlan.title,
         state = state,
-        performer = id.performer.toDto(),
         startTime = startTime,
         endTime = endTime,
+        performer = id.performer.toDto(),
     )

@@ -1,7 +1,8 @@
 package com.partymap.backend.domain.performer
 
-import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.common.dto.LinkDto
+import com.partymap.backend.domain.common.dto.toDto
+import com.partymap.backend.domain.common.dto.toEmbeddables
+import com.partymap.backend.domain.common.trimToNull
 import com.partymap.backend.domain.performer.db.PerformerEntity
 import com.partymap.backend.domain.performer.dto.PerformerAdminListItemDto
 import com.partymap.backend.domain.performer.dto.PerformerCreateDto
@@ -11,52 +12,43 @@ import com.partymap.backend.domain.search.SearchHitType
 import com.partymap.backend.domain.user.UserEntity
 
 fun PerformerEntity.toDto(): PerformerDto = PerformerDto(
-    id = id!!,
+    id = requiredId,
     name = name,
     genre = genre,
     bio = bio,
     image = image,
-    links = links.map { LinkDto(it.type, it.url) },
+    links = links.map { it.toDto() },
 )
 
 fun PerformerEntity.toSearchHitDto(): SearchHitDto = SearchHitDto(
-    id = this.id!!,
+    id = requiredId,
     type = SearchHitType.PERFORMER,
-    title = this.name,
-    subtitle = this.genre,
-    image = this.image,
+    title = name,
+    subtitle = genre,
+    image = image,
     nextEventStart = null,
     placeId = null,
 )
 
 fun PerformerEntity.toAdminListItemDto(): PerformerAdminListItemDto = PerformerAdminListItemDto(
-    id = this.id!!,
-    name = this.name,
+    id = requiredId,
+    name = name,
 )
 
 fun PerformerCreateDto.toEntity(owner: UserEntity): PerformerEntity = PerformerEntity(
-    name = name,
-    genre = genre,
+    name = name.trim(),
+    genre = genre.trim(),
     bio = bio,
-    image = image,
-    links = (links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList(),
+    image = image.trimToNull(),
+    links = links.toEmbeddables(),
     owner = owner,
 )
 
 fun PerformerEntity.updateFromDto(dto: PerformerCreateDto) {
-    name = dto.name
-    genre = dto.genre
+    name = dto.name.trim()
+    genre = dto.genre.trim()
     bio = dto.bio
-    image = dto.image
-    links = (dto.links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList()
+    image = dto.image.trimToNull()
+    links.clear()
+    links.addAll(dto.links.toEmbeddables())
 }

@@ -1,6 +1,7 @@
 package com.partymap.backend
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,6 +42,7 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
             "/api/me/likes/events/{eventId}", "/api/search",
         )
         assertEquals(emptySet<String>(), expected - paths, "missing paths")
+        assertFalse(paths.any { it.endsWith("/set-status") }, "the removed set-status endpoint is still documented")
 
         val out = Path.of("build", "openapi.json")
         Files.createDirectories(out.parent)

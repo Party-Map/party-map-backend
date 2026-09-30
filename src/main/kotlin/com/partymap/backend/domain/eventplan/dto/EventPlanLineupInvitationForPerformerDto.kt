@@ -9,7 +9,7 @@ data class EventPlanLineupInvitationForPerformerDto(
     val eventPlanId: UUID,
     val eventPlanTitle: String,
     val state: EventPlanLineupInvitationState,
-    var startTime: LocalDateTime,
-    var endTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val performer: PerformerDto,
 )

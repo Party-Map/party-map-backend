@@ -2,8 +2,6 @@ package com.partymap.backend.domain.performer.db
 
 import com.partymap.backend.domain.common.db.BaseEntity
 import com.partymap.backend.domain.common.db.LinkEmbeddable
-import com.partymap.backend.domain.event.db.EventLineupItemEntity
-import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationEntity
 import com.partymap.backend.domain.user.UserEntity
 import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
@@ -13,40 +11,25 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
-import jakarta.persistence.OneToMany
 
+/** Lineup items and invitations point at the performer; query them through their repositories. */
 @Entity
 class PerformerEntity(
-
     @Column(nullable = false)
     var name: String,
-
     @Column(nullable = false)
     var genre: String,
-
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "text", nullable = false)
     var bio: String,
-
-    @Column(nullable = true)
-    var image: String? = null,
-
+    @Column(length = 2048)
+    var image: String?,
     @ElementCollection
-    @CollectionTable(
-        name = "performer_links",
-        joinColumns = [JoinColumn(name = "performer_id")],
-    )
-    var links: MutableList<LinkEmbeddable> = mutableListOf(),
-
-    @ManyToMany(mappedBy = "likedPerformers")
-    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
-
-    @OneToMany
-    var lineupItems: MutableList<EventLineupItemEntity> = mutableListOf(),
-
-    @OneToMany
-    var lineupInvitations: MutableList<EventPlanLineupInvitationEntity> = mutableListOf(),
-
-    // owner
+    @CollectionTable(name = "performer_links", joinColumns = [JoinColumn(name = "performer_id")])
+    var links: MutableList<LinkEmbeddable>,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_sub", nullable = false)
     var owner: UserEntity,
-) : BaseEntity()
+) : BaseEntity() {
+    @ManyToMany(mappedBy = "likedPerformers")
+    var likedByUsers: MutableSet<UserEntity> = mutableSetOf()
+}

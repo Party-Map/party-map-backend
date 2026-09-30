@@ -1,6 +1,6 @@
 package com.partymap.backend.domain.event
 
-import com.partymap.backend.domain.common.dto.LinkDto
+import com.partymap.backend.domain.common.dto.toDto
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventLineupItemEntity
 import com.partymap.backend.domain.event.dto.EventAdminListItemDto
@@ -12,9 +12,9 @@ import com.partymap.backend.domain.search.SearchHitDto
 import com.partymap.backend.domain.search.SearchHitType
 
 fun EventEntity.toDto(): EventDto = EventDto(
-    id = id!!,
+    id = requiredId,
     title = title,
-    placeId = place.id!!,
+    placeId = place.requiredId,
     description = description,
     start = start,
     end = end,
@@ -22,47 +22,31 @@ fun EventEntity.toDto(): EventDto = EventDto(
     lineupItems = lineupItems.map { it.toDto() },
     price = price,
     kind = kind,
-    links = links.map { LinkDto(it.type, it.url) },
+    links = links.map { it.toDto() },
 )
 
-fun EventEntity.toPlaceUpcomingEventDto(): PlaceUpcomingEventDto {
-    val fallbackImage = this.place.image
-    val finalImage = this.image ?: fallbackImage
+/** The event as the map popup shows it; the place's image stands in for a missing event image. */
+fun EventEntity.toPlaceUpcomingEventDto(): PlaceUpcomingEventDto = PlaceUpcomingEventDto(
+    placeId = place.requiredId,
+    eventId = requiredId,
+    title = title,
+    image = image ?: place.image,
+    start = start,
+    kind = kind,
+)
 
-    return PlaceUpcomingEventDto(
-        placeId = place.id!!,
-        eventId = id!!,
-        title = title,
-        image = finalImage,
-        start = this.start,
-        kind = this.kind,
-    )
-}
-
-fun EventEntity.toSearchHitDto(): SearchHitDto {
-    val place = this.place
-
-    val subtitle = buildString {
-        append(place.name)
-        append(" • ")
-        append(place.city)
-    }
-
-    val image = this.image ?: place.image
-
-    return SearchHitDto(
-        id = this.id!!,
-        type = SearchHitType.EVENT,
-        title = this.title,
-        subtitle = subtitle,
-        image = image,
-        nextEventStart = this.start,
-        placeId = place.id,
-    )
-}
+fun EventEntity.toSearchHitDto(): SearchHitDto = SearchHitDto(
+    id = requiredId,
+    type = SearchHitType.EVENT,
+    title = title,
+    subtitle = "${place.name} • ${place.city}",
+    image = image ?: place.image,
+    nextEventStart = start,
+    placeId = place.requiredId,
+)
 
 fun EventEntity.toAdminListItemDto(): EventAdminListItemDto = EventAdminListItemDto(
-    id = id!!,
+    id = requiredId,
     title = title,
     start = start,
     end = end,

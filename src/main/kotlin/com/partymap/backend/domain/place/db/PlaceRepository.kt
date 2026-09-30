@@ -8,5 +8,14 @@ interface PlaceRepository :
     JpaRepository<PlaceEntity, UUID>,
     JpaSpecificationExecutor<PlaceEntity> {
     fun findAllByLikedByUsersSub(sub: UUID): List<PlaceEntity>
-    fun findAllByOwnerSub(ownerId: UUID): List<PlaceEntity>
+
+    fun findAllByOwnerSub(sub: UUID): List<PlaceEntity>
+
+    /** Places inside the box (no antimeridian wrap: the map never spans it). */
+    fun findAllByLocationLatitudeBetweenAndLocationLongitudeBetween(
+        minLatitude: Double,
+        maxLatitude: Double,
+        minLongitude: Double,
+        maxLongitude: Double,
+    ): List<PlaceEntity>
 }

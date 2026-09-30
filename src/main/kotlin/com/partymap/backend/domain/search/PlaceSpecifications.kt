@@ -1,35 +1,24 @@
 package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.place.db.PlaceEntity
-import jakarta.persistence.criteria.JoinType
-import jakarta.persistence.criteria.Predicate
+import com.partymap.backend.domain.search.SearchUtils.contains
 import org.springframework.data.jpa.domain.Specification
 
 object PlaceSpecifications {
-
-    fun matchesQuery(rawQuery: String): Specification<PlaceEntity> {
-        val keywords = SearchUtils.prepareKeywords(rawQuery)
-        if (keywords.isEmpty()) {
-            return Specification { _, _, _ -> null }
-        }
-
-        return Specification { root, _, cb ->
-            val predicates = mutableListOf<Predicate>()
-
-            val nameExpr = root.get<String>("name")
-            val cityExpr = root.get<String>("city")
-            val addressExpr = root.get<String>("address")
-            val descExpr = cb.coalesce(root.get("description"), "")
-
-            predicates += SearchUtils.andKeywordsLike(cb, nameExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, cityExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, addressExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, descExpr, keywords)
-
-            val tagsJoin = root.join<PlaceEntity, String>("tags", JoinType.LEFT)
-            predicates += SearchUtils.andKeywordsLike(cb, tagsJoin, keywords)
-
-            cb.or(*predicates.toTypedArray())
+    /** Name, city, address, description or one of the tags contains each keyword. */
+    fun matchesKeywords(keywords: List<String>): Specification<PlaceEntity> = Specification { root, query, cb ->
+        val description = cb.coalesce(root.get<String>("description"), "")
+        SearchUtils.everyKeywordMatches(cb, keywords) { keyword ->
+            val tagQuery = requireNotNull(query).subquery(Int::class.java)
+            val tag = tagQuery.correlate(root).join<PlaceEntity, String>("tags")
+            tagQuery.select(cb.literal(1)).where(contains(cb, tag, keyword))
+            listOf(
+                contains(cb, root.get("name"), keyword),
+                contains(cb, root.get("city"), keyword),
+                contains(cb, root.get("address"), keyword),
+                contains(cb, description, keyword),
+                cb.exists(tagQuery),
+            )
         }
     }
 }

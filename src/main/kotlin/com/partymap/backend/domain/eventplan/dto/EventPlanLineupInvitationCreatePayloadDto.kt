@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class EventPlanLineupInvitationCreatePayloadDto(
-    var performerId: UUID,
-    var startTime: LocalDateTime,
-    var endTime: LocalDateTime,
+    val performerId: UUID,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
 )

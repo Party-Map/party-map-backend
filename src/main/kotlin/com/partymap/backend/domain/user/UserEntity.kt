@@ -16,20 +16,24 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.util.UUID
 
+/**
+ * A Keycloak user, known only by the token subject. The like sets map the `user_liked_*` join tables for the
+ * liked-list queries; likes are written with SQL by `LikeService`.
+ */
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 class UserEntity(
     @Id
     @Column(updatable = false)
     var sub: UUID,
-
+) {
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    var createdDate: Instant? = null,
+    var createdAt: Instant? = null
 
     @LastModifiedDate
     @Column(nullable = false)
-    var updatedDate: Instant? = null,
+    var updatedAt: Instant? = null
 
     @ManyToMany
     @JoinTable(
@@ -37,7 +41,7 @@ class UserEntity(
         joinColumns = [JoinColumn(name = "user_sub")],
         inverseJoinColumns = [JoinColumn(name = "event_id")],
     )
-    var likedEvents: MutableSet<EventEntity> = mutableSetOf(),
+    var likedEvents: MutableSet<EventEntity> = mutableSetOf()
 
     @ManyToMany
     @JoinTable(
@@ -45,7 +49,7 @@ class UserEntity(
         joinColumns = [JoinColumn(name = "user_sub")],
         inverseJoinColumns = [JoinColumn(name = "place_id")],
     )
-    var likedPlaces: MutableSet<PlaceEntity> = mutableSetOf(),
+    var likedPlaces: MutableSet<PlaceEntity> = mutableSetOf()
 
     @ManyToMany
     @JoinTable(
@@ -53,5 +57,5 @@ class UserEntity(
         joinColumns = [JoinColumn(name = "user_sub")],
         inverseJoinColumns = [JoinColumn(name = "performer_id")],
     )
-    var likedPerformers: MutableSet<PerformerEntity> = mutableSetOf(),
-)
+    var likedPerformers: MutableSet<PerformerEntity> = mutableSetOf()
+}

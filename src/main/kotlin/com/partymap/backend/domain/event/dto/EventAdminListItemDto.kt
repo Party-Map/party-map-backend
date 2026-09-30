@@ -6,7 +6,7 @@ import java.util.UUID
 data class EventAdminListItemDto(
     val id: UUID,
     val title: String,
-    var start: LocalDateTime,
-    var end: LocalDateTime,
+    val start: LocalDateTime,
+    val end: LocalDateTime,
     val placeName: String,
 )

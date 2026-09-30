@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 
 data class EventPlanLineupInvitationDto(
     val state: EventPlanLineupInvitationState,
-    var startTime: LocalDateTime,
-    var endTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val performer: PerformerDto,
 )

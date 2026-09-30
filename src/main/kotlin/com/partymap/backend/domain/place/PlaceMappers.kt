@@ -1,9 +1,10 @@
 package com.partymap.backend.domain.place
 
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
-import com.partymap.backend.domain.common.db.LinkEmbeddable
 import com.partymap.backend.domain.common.dto.GeoPointDto
-import com.partymap.backend.domain.common.dto.LinkDto
+import com.partymap.backend.domain.common.dto.toDto
+import com.partymap.backend.domain.common.dto.toEmbeddables
+import com.partymap.backend.domain.common.trimToNull
 import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.dto.PlaceCreateDto
@@ -13,79 +14,58 @@ import com.partymap.backend.domain.search.SearchHitType
 import com.partymap.backend.domain.user.UserEntity
 
 fun PlaceEntity.toDto(): PlaceDto = PlaceDto(
-    id = id!!,
+    id = requiredId,
     name = name,
-    location = GeoPointDto(
-        latitude = location.latitude,
-        longitude = location.longitude,
-    ),
+    location = GeoPointDto(location.latitude, location.longitude),
     address = address,
     city = city,
     description = description,
     image = image,
-    tags = tags.toList(),
-    links = links.map { LinkDto(it.type, it.url) },
+    tags = tags.sorted(),
+    links = links.map { it.toDto() },
 )
 
-fun PlaceEntity.toSearchHitDto(): SearchHitDto {
-    val subtitle = buildString {
-        append(city)
-        if (address.isNotBlank()) {
-            append(" • ")
-            append(address)
-        }
-    }
-
-    return SearchHitDto(
-        id = this.id!!,
-        type = SearchHitType.PLACE,
-        title = this.name,
-        subtitle = subtitle,
-        image = this.image,
-        nextEventStart = null,
-        placeId = this.id,
-    )
-}
-
-fun GeoPointDto.toEmbeddable() = GeoPointEmbeddable(latitude = latitude, longitude = longitude)
-
-fun PlaceCreateDto.toEntity(owner: UserEntity): PlaceEntity = PlaceEntity(
-    name = name,
-    location = location.toEmbeddable(),
-    address = address,
-    city = city,
-    description = description,
+fun PlaceEntity.toSearchHitDto(): SearchHitDto = SearchHitDto(
+    id = requiredId,
+    type = SearchHitType.PLACE,
+    title = name,
+    subtitle = if (address.isBlank()) city else "$city • $address",
     image = image,
-    tags = (tags ?: emptyList()).toMutableSet(),
-    links = (links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList(),
-    owner = owner,
+    nextEventStart = null,
+    placeId = requiredId,
 )
 
 fun PlaceEntity.toAdminListItemDto(): PlaceAdminListItemDto = PlaceAdminListItemDto(
-    id = this.id!!,
-    name = this.name,
-    address = this.address,
-    city = this.city,
+    id = requiredId,
+    name = name,
+    address = address,
+    city = city,
+)
+
+fun PlaceCreateDto.toEntity(owner: UserEntity): PlaceEntity = PlaceEntity(
+    name = name.trim(),
+    location = GeoPointEmbeddable(location.latitude, location.longitude),
+    address = address.trim(),
+    city = city.trim(),
+    description = description,
+    image = image.trimToNull(),
+    tags = cleanTags(),
+    links = links.toEmbeddables(),
+    owner = owner,
 )
 
 fun PlaceEntity.updateFromDto(dto: PlaceCreateDto) {
-    name = dto.name
-    location = dto.location.toEmbeddable()
-    address = dto.address
-    city = dto.city
+    name = dto.name.trim()
+    location = GeoPointEmbeddable(dto.location.latitude, dto.location.longitude)
+    address = dto.address.trim()
+    city = dto.city.trim()
     description = dto.description
-    image = dto.image
+    image = dto.image.trimToNull()
     tags.clear()
-    tags.addAll(dto.tags ?: emptyList())
-    links = (dto.links ?: emptyList()).map {
-        LinkEmbeddable(
-            type = it.type,
-            url = it.url,
-        )
-    }.toMutableList()
+    tags.addAll(dto.cleanTags())
+    links.clear()
+    links.addAll(dto.links.toEmbeddables())
 }
+
+private fun PlaceCreateDto.cleanTags(): MutableSet<String> =
+    tags.orEmpty().map { it.trim() }.filter { it.isNotEmpty() }.toMutableSet()

@@ -1,16 +1,15 @@
+# Local development: a throwaway schema that is recreated and seeded on every start (see DevDatabaseConfig).
 spring:
-  sql:
-    init:
-      mode: always
-  jpa:
-    hibernate:
-      ddl-auto: create
-    show-sql: true
-    defer-datasource-initialization: true
   datasource:
     url: jdbc:postgresql://localhost:5432/partymap
     username: partymap
     password: partymap
+  jpa:
+    show-sql: true
+  flyway:
+    # db/seed/afterMigrate.sql is a Flyway callback that inserts the demo data after the migrations.
+    locations: classpath:db/migration,classpath:db/seed
+    clean-disabled: false
   security:
     oauth2:
       resourceserver:

@@ -6,24 +6,33 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.Version
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.time.Instant
 import java.util.UUID
 
+/** UUID id, audit timestamps and an optimistic-locking version for every top-level entity. */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
-abstract class BaseEntity(
+abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    var id: UUID? = null,
+    var id: UUID? = null
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
-    var createdDate: Instant? = null,
+    var createdAt: Instant? = null
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    var updatedDate: Instant? = null,
-)
+    var updatedAt: Instant? = null
+
+    @Version
+    @Column(nullable = false)
+    var version: Long = 0
+
+    /** The id of a persisted entity. */
+    val requiredId: UUID get() = checkNotNull(id) { "${javaClass.simpleName} is not saved yet" }
+}

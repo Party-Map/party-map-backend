@@ -1,15 +1,15 @@
 package com.partymap.backend.domain.place
 
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationRepository
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
+import com.partymap.backend.config.Roles
+import com.partymap.backend.domain.eventplan.InvitationService
+import com.partymap.backend.domain.eventplan.db.InvitationAnswer
 import com.partymap.backend.domain.eventplan.dto.EventPlanPlaceInvitationWithDateDto
-import com.partymap.backend.domain.like.service.UserLikesFetchService
-import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
 import com.partymap.backend.domain.place.dto.PlaceCreateDto
 import com.partymap.backend.domain.place.dto.PlaceDto
 import com.partymap.backend.domain.user.CurrentUserService
-import jakarta.transaction.Transactional
+import io.swagger.v3.oas.annotations.Parameter
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -21,133 +21,68 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/places")
 class PlaceController(
-    private val placeRepository: PlaceRepository,
+    private val placeService: PlaceService,
+    private val invitationService: InvitationService,
     private val currentUserService: CurrentUserService,
-    private val userLikesFetchService: UserLikesFetchService,
-    private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
 ) {
-    @GetMapping("/places")
-    fun getPlaces(): List<PlaceDto> = placeRepository.findAll()
-        .map { it.toDto() }
+    @GetMapping
+    fun getPlaces(
+        @Parameter(description = "Only places inside minLon,minLat,maxLon,maxLat", example = "18.9,47.3,19.3,47.7")
+        @RequestParam(required = false)
+        bbox: String?,
+    ): List<PlaceDto> = placeService.list(bbox?.let(BoundingBox::parse))
 
-    @GetMapping("/places/{id}")
-    fun getPlace(@PathVariable id: UUID): PlaceDto = placeRepository.findById(id)
-        .orElseThrow { NoSuchElementException("Place $id not found") }
-        .toDto()
+    @GetMapping("/{id}")
+    fun getPlace(@PathVariable id: UUID): PlaceDto = placeService.get(id)
 
-    @GetMapping("/places/liked-places")
-    fun getLikedPlacesForUser(@AuthenticationPrincipal jwt: Jwt): List<PlaceDto> {
-        val user = currentUserService.getOrCreateUser(jwt)
-        return userLikesFetchService.getLikedPlaces(user.sub)
-    }
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/liked-places")
+    fun getLikedPlaces(@AuthenticationPrincipal jwt: Jwt): List<PlaceDto> =
+        placeService.liked(currentUserService.getOrCreateUser(jwt).sub)
 
-    @PreAuthorize("hasRole('place_manager_user')")
-    @GetMapping("/places/owned-places")
-    fun getMyPlacesForUser(@AuthenticationPrincipal jwt: Jwt): List<PlaceAdminListItemDto> {
-        val user = currentUserService.getOrCreateUser(jwt)
-        return placeRepository.findAllByOwnerSub(user.sub).map { it.toAdminListItemDto() }
-    }
+    @PreAuthorize("hasRole('${Roles.PLACE_MANAGER}')")
+    @GetMapping("/owned-places")
+    fun getOwnedPlaces(@AuthenticationPrincipal jwt: Jwt): List<PlaceAdminListItemDto> =
+        placeService.owned(currentUserService.getOrCreateUser(jwt).sub)
 
-    @PreAuthorize("hasRole('place_manager_user')")
-    @PostMapping("/places")
-    fun createPlace(@AuthenticationPrincipal jwt: Jwt, @RequestBody dto: PlaceCreateDto): PlaceDto {
-        val user = currentUserService.getOrCreateUser(jwt)
-        val entity = dto.toEntity(user)
-        val saved = placeRepository.save(entity)
-        return saved.toDto()
-    }
+    @PreAuthorize("hasRole('${Roles.PLACE_MANAGER}')")
+    @PostMapping
+    fun createPlace(@AuthenticationPrincipal jwt: Jwt, @Valid @RequestBody dto: PlaceCreateDto): PlaceDto =
+        placeService.create(currentUserService.getOrCreateUser(jwt).sub, dto)
 
-    @PreAuthorize("hasRole('place_manager_user')")
-    @PutMapping("/places/{id}")
+    @PreAuthorize("hasRole('${Roles.PLACE_MANAGER}')")
+    @PutMapping("/{id}")
     fun updatePlace(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable id: UUID,
-        @RequestBody dto: PlaceCreateDto,
-    ): PlaceDto {
-        val user = currentUserService.getOrCreateUser(jwt)
+        @Valid @RequestBody dto: PlaceCreateDto,
+    ): PlaceDto = placeService.update(currentUserService.getOrCreateUser(jwt).sub, id, dto)
 
-        val place = placeRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
-
-        if (place.owner.sub != user.sub) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "You are not allowed to edit this place")
-        }
-
-        place.updateFromDto(dto)
-
-        val saved = placeRepository.save(place)
-        return saved.toDto()
-    }
-
-    @PreAuthorize("hasRole('place_manager_user')")
-    @GetMapping("/places/{id}/invitations")
+    @PreAuthorize("hasRole('${Roles.PLACE_MANAGER}')")
+    @GetMapping("/{id}/invitations")
     fun getPlaceInvitations(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable id: UUID,
-    ): List<EventPlanPlaceInvitationWithDateDto> {
-        currentUserService.getOrCreateUser(jwt)
+    ): List<EventPlanPlaceInvitationWithDateDto> =
+        invitationService.placeInvitations(currentUserService.getOrCreateUser(jwt).sub, id)
 
-        val place = placeRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
-
-        val invitations = eventPlanPlaceInvitationRepository.findAllByPlaceId(place.id!!)
-
-        return invitations.map {
-            EventPlanPlaceInvitationWithDateDto(
-                eventPlanId = it.id.eventPlan.id!!,
-                state = it.state,
-                title = it.id.eventPlan.title,
-                startDateTime = it.id.eventPlan.startDateTime,
-                endDateTime = it.id.eventPlan.endDateTime,
-            )
-        }
-    }
-
-    @PreAuthorize("hasRole('place_manager_user')")
-    @PutMapping("/places/{id}/invitations/{eventPlanId}/respond")
-    @Transactional
+    @PreAuthorize("hasRole('${Roles.PLACE_MANAGER}')")
+    @PutMapping("/{id}/invitations/{eventPlanId}/respond")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun respondToPlaceInvitation(
         @AuthenticationPrincipal jwt: Jwt,
         @PathVariable id: UUID,
         @PathVariable eventPlanId: UUID,
-        @RequestParam state: String,
-    ): HttpStatus {
-        val user = currentUserService.getOrCreateUser(jwt)
-
-        val place = placeRepository.findById(id)
-            .orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND, "Place $id not found") }
-
-        if (place.owner.sub != user.sub) {
-            throw ResponseStatusException(
-                HttpStatus.FORBIDDEN,
-                "You are not allowed to manage invitations for this place",
-            )
-        }
-
-        val invitation = eventPlanPlaceInvitationRepository
-            .findByPlaceIdAndEventPlanId(place.id!!, eventPlanId)
-            .orElseThrow {
-                ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Invitation for event plan $eventPlanId not found for place $id",
-                )
-            }
-
-        when (state.lowercase()) {
-            "accept" -> invitation.state = EventPlanPlaceInvitationState.ACCEPTED
-            "reject" -> invitation.state = EventPlanPlaceInvitationState.REJECTED
-            else -> throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state: $state")
-        }
-
-        eventPlanPlaceInvitationRepository.save(invitation)
-
-        return HttpStatus.OK
+        @Parameter(description = "accept or reject") @RequestParam state: String,
+    ) {
+        val answer = InvitationAnswer.parse(state)
+        invitationService.respondAsPlace(currentUserService.getOrCreateUser(jwt).sub, id, eventPlanId, answer)
     }
 }

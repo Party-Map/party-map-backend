@@ -16,43 +16,29 @@ import jakarta.persistence.ManyToOne
 
 @Entity
 class PlaceEntity(
-
     @Column(nullable = false)
     var name: String,
-
     @Embedded
     var location: GeoPointEmbeddable,
-
     @Column(nullable = false)
     var address: String,
-
     @Column(nullable = false)
     var city: String,
-
     @Column(columnDefinition = "text")
-    var description: String? = null,
-
-    @Column(nullable = true)
-    var image: String? = null,
-
+    var description: String?,
+    @Column(length = 2048)
+    var image: String?,
     @ElementCollection
-    @CollectionTable(
-        name = "place_tags",
-        joinColumns = [JoinColumn(name = "place_id")],
-    )
-    @Column(nullable = false)
-    var tags: MutableSet<String> = mutableSetOf(),
-
+    @CollectionTable(name = "place_tags", joinColumns = [JoinColumn(name = "place_id")])
+    @Column(name = "tags", nullable = false)
+    var tags: MutableSet<String>,
     @ElementCollection
-    @CollectionTable(
-        name = "place_links",
-        joinColumns = [JoinColumn(name = "place_id")],
-    )
-    var links: MutableList<LinkEmbeddable> = mutableListOf(),
-
-    @ManyToMany(mappedBy = "likedPlaces")
-    var likedByUsers: MutableSet<UserEntity> = mutableSetOf(),
-
+    @CollectionTable(name = "place_links", joinColumns = [JoinColumn(name = "place_id")])
+    var links: MutableList<LinkEmbeddable>,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_sub", nullable = false)
     var owner: UserEntity,
-) : BaseEntity()
+) : BaseEntity() {
+    @ManyToMany(mappedBy = "likedPlaces")
+    var likedByUsers: MutableSet<UserEntity> = mutableSetOf()
+}

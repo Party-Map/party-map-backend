@@ -1,5 +1,8 @@
 package com.partymap.backend.domain.eventplan
 
+import com.partymap.backend.domain.common.db.LinkEmbeddable
+import com.partymap.backend.domain.common.exception.NotFoundException
+import com.partymap.backend.domain.common.exception.requireOwner
 import com.partymap.backend.domain.event.db.EventEntity
 import com.partymap.backend.domain.event.db.EventLineupItemEntity
 import com.partymap.backend.domain.event.db.EventLineupItemId
@@ -10,131 +13,135 @@ import com.partymap.backend.domain.eventplan.db.EventPlanLineupInvitationState
 import com.partymap.backend.domain.eventplan.db.EventPlanLineupItemId
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntity
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationEntityId
-import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationRepository
 import com.partymap.backend.domain.eventplan.db.EventPlanPlaceInvitationState
 import com.partymap.backend.domain.eventplan.db.EventPlanRepository
-import com.partymap.backend.domain.eventplan.exception.AlreadyInvitedPerformerException
-import com.partymap.backend.domain.eventplan.exception.InvalidStartOrEndTimeException
-import com.partymap.backend.domain.eventplan.exception.NoValidPlaceInvitationException
-import com.partymap.backend.domain.eventplan.exception.PendingLineupInvitationException
-import com.partymap.backend.domain.performer.db.PerformerEntity
-import com.partymap.backend.domain.place.db.PlaceEntity
-import com.partymap.backend.domain.user.UserEntity
+import com.partymap.backend.domain.eventplan.dto.EventPlanAdminListItemDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanCreateDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationCreatePayloadDto
+import com.partymap.backend.domain.eventplan.dto.EventPlanLineupInvitationDto
+import com.partymap.backend.domain.performer.db.PerformerRepository
+import com.partymap.backend.domain.place.db.PlaceRepository
+import com.partymap.backend.domain.user.UserRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.UUID
 
+/** The organizer's side of the event plan workflow; every method checks that [UUID] `sub` owns the plan. */
 @Service
+@Transactional
 class EventPlanService(
     private val eventPlanRepository: EventPlanRepository,
-    private val eventPlanPlaceInvitationRepository: EventPlanPlaceInvitationRepository,
+    private val placeRepository: PlaceRepository,
+    private val performerRepository: PerformerRepository,
     private val eventRepository: EventRepository,
+    private val userRepository: UserRepository,
 ) {
+    @Transactional(readOnly = true)
+    fun get(sub: UUID, id: UUID): EventPlanDto = ownedPlan(sub, id, "view this event plan").toDto()
 
-    @Transactional
-    @Throws(
-        AlreadyInvitedPerformerException::class,
-        InvalidStartOrEndTimeException::class,
-    )
-    fun invitePerformer(
-        eventPlan: EventPlanEntity,
-        performer: PerformerEntity,
-        startTime: LocalDateTime,
-        endTime: LocalDateTime,
-    ) {
-        // Check if performer was already invited
-        if (eventPlan.lineupInvitations.any { it.id.performer == performer }) {
-            throw AlreadyInvitedPerformerException()
+    @Transactional(readOnly = true)
+    fun owned(sub: UUID): List<EventPlanAdminListItemDto> =
+        eventPlanRepository.findAllByOwnerSubOrderByStartDateTimeAsc(sub).map { it.toAdminListItemDto() }
+
+    fun create(sub: UUID, dto: EventPlanCreateDto): EventPlanDto {
+        requireTimeRange(dto.startDateTime, dto.endDateTime, "event")
+        return eventPlanRepository.save(dto.toEntity(userRepository.getReferenceById(sub))).toDto()
+    }
+
+    fun update(sub: UUID, id: UUID, dto: EventPlanCreateDto): EventPlanDto {
+        val plan = ownedPlan(sub, id, "edit this event plan")
+        requireTimeRange(dto.startDateTime, dto.endDateTime, "event")
+        plan.updateFromDto(dto)
+        return eventPlanRepository.saveAndFlush(plan).toDto()
+    }
+
+    /** Invites [placeId], replacing an invitation to another place; inviting the same place again resets its answer. */
+    fun invitePlace(sub: UUID, id: UUID, placeId: UUID) {
+        val plan = ownedPlan(sub, id, "edit this event plan")
+        val place = placeRepository.findById(placeId).orElseThrow { NotFoundException("Place", placeId) }
+        val current = plan.placeInvitation
+        if (current != null && current.id.place.id == placeId) {
+            current.state = EventPlanPlaceInvitationState.PENDING
+            return
         }
+        plan.placeInvitations.clear()
+        plan.placeInvitations.add(EventPlanPlaceInvitationEntity(EventPlanPlaceInvitationEntityId(plan, place)))
+    }
 
-        if (endTime.isBefore(startTime)) {
-            throw InvalidStartOrEndTimeException()
+    @Transactional(readOnly = true)
+    fun lineupInvitations(sub: UUID, id: UUID): List<EventPlanLineupInvitationDto> =
+        ownedPlan(sub, id, "view this event plan").lineupInvitations.map { it.toDto() }
+
+    fun invitePerformer(sub: UUID, id: UUID, slot: EventPlanLineupInvitationCreatePayloadDto) {
+        val plan = ownedPlan(sub, id, "edit this event plan")
+        requireTimeRange(slot.startTime, slot.endTime, "lineup slot")
+        if (slot.startTime.isBefore(plan.startDateTime) || slot.endTime.isAfter(plan.endDateTime)) {
+            throw LineupSlotOutsidePlanException()
         }
-
-        eventPlan.lineupInvitations.add(
+        val performer = performerRepository.findById(slot.performerId)
+            .orElseThrow { NotFoundException("Performer", slot.performerId) }
+        if (plan.lineupInvitations.any { it.id.performer.id == performer.id }) throw AlreadyInvitedPerformerException()
+        plan.lineupInvitations.add(
             EventPlanLineupInvitationEntity(
-                id = EventPlanLineupItemId(eventPlan, performer),
-                startTime = startTime,
-                endTime = endTime,
+                id = EventPlanLineupItemId(plan, performer),
+                startTime = slot.startTime,
+                endTime = slot.endTime,
             ),
         )
     }
 
-    @Transactional
-    fun invitePlace(eventPlan: EventPlanEntity, place: PlaceEntity) {
-        // Delete invitation if that already exists
-        if (eventPlan.placeInvitations.size == 1) {
-            val existingInvitation = eventPlan.placeInvitations[0]
-            eventPlanPlaceInvitationRepository.delete(existingInvitation)
-            eventPlan.placeInvitations.remove(existingInvitation)
+    fun removePerformer(sub: UUID, id: UUID, performerId: UUID) {
+        val plan = ownedPlan(sub, id, "edit this event plan")
+        if (!plan.lineupInvitations.removeIf { it.id.performer.id == performerId }) {
+            throw NotFoundException("Performer $performerId is not in the lineup of event plan $id.")
         }
-
-        eventPlan.placeInvitations.add(
-            EventPlanPlaceInvitationEntity(
-                id = EventPlanPlaceInvitationEntityId(eventPlan, place),
-            ),
-        )
     }
 
-    @Transactional
-    @Throws(
-        NoValidPlaceInvitationException::class,
-        PendingLineupInvitationException::class,
-    )
-    fun publish(user: UserEntity, eventPlan: EventPlanEntity) {
-        // Check if there is a place who accepted the invitation
-        if (!eventPlan.placeInvitations.any { it.state == EventPlanPlaceInvitationState.ACCEPTED }) {
-            throw NoValidPlaceInvitationException()
-        }
-
-        // Check if there are no pending performer invitations
-        if (eventPlan.lineupInvitations.any { it.state == EventPlanLineupInvitationState.PENDING }) {
+    /**
+     * Turns the plan into an event at the accepted place with the accepted performers, then deletes the plan and its
+     * invitations. Rejected performers are left out; a pending one blocks publishing.
+     */
+    fun publish(sub: UUID, id: UUID): UUID {
+        val plan = ownedPlan(sub, id, "publish this event plan")
+        val placeInvitation = plan.placeInvitation?.takeIf { it.state == EventPlanPlaceInvitationState.ACCEPTED }
+            ?: throw NoAcceptedPlaceException()
+        if (plan.lineupInvitations.any { it.state == EventPlanLineupInvitationState.PENDING }) {
             throw PendingLineupInvitationException()
         }
-
         val event = eventRepository.save(
             EventEntity(
-                title = eventPlan.title,
-                description = eventPlan.description,
-                start = eventPlan.startDateTime,
-                end = eventPlan.endDateTime,
-                image = eventPlan.image,
-                price = eventPlan.price,
-                kind = eventPlan.kind,
-                links = eventPlan.links,
-                place = eventPlan.placeInvitations.first().id.place,
-                owner = user,
+                title = plan.title,
+                place = placeInvitation.id.place,
+                description = plan.description,
+                start = plan.startDateTime,
+                end = plan.endDateTime,
+                image = plan.image,
+                price = plan.price,
+                kind = plan.kind,
+                links = plan.links.map { LinkEmbeddable(it.type, it.url) }.toMutableList(),
+                owner = plan.owner,
             ),
         )
-
-        event.lineupItems = eventPlan.lineupInvitations.filter { it.state == EventPlanLineupInvitationState.ACCEPTED }
-            .map {
-                EventLineupItemEntity(
-                    id = EventLineupItemId(
-                        event = event,
-                        performer = it.id.performer,
-                    ),
-                    startTime = it.startTime,
-                    endTime = it.endTime,
+        plan.lineupInvitations
+            .filter { it.state == EventPlanLineupInvitationState.ACCEPTED }
+            .forEach {
+                event.lineupItems.add(
+                    EventLineupItemEntity(EventLineupItemId(event, it.id.performer), it.startTime, it.endTime),
                 )
-            }.toMutableList()
-
-        eventPlanRepository.delete(eventPlan)
+            }
+        eventPlanRepository.delete(plan)
+        return event.requiredId
     }
 
-    @Transactional
-    fun respondToPerformerInvitation(
-        eventPlan: EventPlanEntity,
-        performer: PerformerEntity,
-        newState: EventPlanLineupInvitationState,
-    ) {
-        val invitation = eventPlan.lineupInvitations.firstOrNull { it.id.performer.id == performer.id }
-            ?: throw IllegalArgumentException(
-                "Lineup invitation for performer ${performer.id} not found in event plan ${eventPlan.id}",
-            )
+    private fun ownedPlan(sub: UUID, id: UUID, action: String): EventPlanEntity {
+        val plan = eventPlanRepository.findById(id).orElseThrow { NotFoundException("Event plan", id) }
+        requireOwner(plan.owner.sub, sub, action)
+        return plan
+    }
 
-        invitation.state = newState
-
-        eventPlanRepository.save(eventPlan)
+    private fun requireTimeRange(start: LocalDateTime, end: LocalDateTime, what: String) {
+        if (!end.isAfter(start)) throw InvalidTimeRangeException(what)
     }
 }

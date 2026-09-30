@@ -16,56 +16,40 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import java.time.LocalDateTime
 
+/** A published event; created only by publishing an event plan. */
 @Entity
 class EventEntity(
-
     @Column(nullable = false)
     var title: String,
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "place_id", nullable = false)
     var place: PlaceEntity,
-
-    @Column(columnDefinition = "text")
+    @Column(columnDefinition = "text", nullable = false)
     var description: String,
-
     @Column(name = "start_time", nullable = false)
     var start: LocalDateTime,
-
     @Column(name = "end_time", nullable = false)
     var end: LocalDateTime,
-
-    @Column(nullable = true)
-    var image: String? = null,
-
-    @Column(nullable = true)
-    var price: String? = null,
-
+    @Column(length = 2048)
+    var image: String?,
+    var price: String?,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var kind: EventType,
-
-    @OneToMany(
-        mappedBy = "id.event",
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true,
-        fetch = FetchType.EAGER,
-    )
-    var lineupItems: MutableList<EventLineupItemEntity> = mutableListOf(),
-
     @ElementCollection
-    @CollectionTable(
-        name = "event_links",
-        joinColumns = [JoinColumn(name = "event_id")],
-    )
-    var links: MutableList<LinkEmbeddable> = mutableListOf(),
-
-    @ManyToMany(mappedBy = "likedEvents")
-    var likedByUsers: MutableList<UserEntity> = mutableListOf(),
-
+    @CollectionTable(name = "event_links", joinColumns = [JoinColumn(name = "event_id")])
+    var links: MutableList<LinkEmbeddable>,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false)
     var owner: UserEntity,
-) : BaseEntity()
+) : BaseEntity() {
+    @OneToMany(mappedBy = "id.event", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OrderBy("startTime")
+    var lineupItems: MutableList<EventLineupItemEntity> = mutableListOf()
+
+    @ManyToMany(mappedBy = "likedEvents")
+    var likedByUsers: MutableSet<UserEntity> = mutableSetOf()
+}

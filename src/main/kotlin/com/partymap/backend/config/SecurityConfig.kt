@@ -2,37 +2,44 @@ package com.partymap.backend.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
 import org.springframework.security.config.core.GrantedAuthorityDefaults
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter
 import org.springframework.security.web.SecurityFilterChain
 
+/**
+ * Stateless bearer-token security. Reads are public except the caller's own data; every write needs a token, and the
+ * role and ownership rules sit on the controller methods (`@PreAuthorize`) and in the services.
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 class SecurityConfig {
-
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(http: HttpSecurity, jwtAuthenticationConverter: JwtAuthenticationConverter): SecurityFilterChain {
         http {
             authorizeHttpRequests {
-                authorize(anyRequest, permitAll)
+                authorize("/api/me/**", authenticated)
+                authorize("/api/*/liked-*", authenticated)
+                authorize(HttpMethod.GET, "/**", permitAll)
+                authorize("/error", permitAll)
+                authorize(anyRequest, authenticated)
             }
             cors {}
             csrf { disable() }
-            oauth2ResourceServer { jwt { jwtAuthenticationConverter } }
+            sessionManagement { sessionCreationPolicy = SessionCreationPolicy.STATELESS }
+            oauth2ResourceServer { jwt { this.jwtAuthenticationConverter = jwtAuthenticationConverter } }
         }
         return http.build()
     }
 
-    @Bean
-    fun grantedAuthorityDefaults(): GrantedAuthorityDefaults = GrantedAuthorityDefaults("")
-
-    // https://www.baeldung.com/spring-security-map-authorities-jwt
+    /** Keycloak realm roles arrive in the top-level `roles` claim and are used as authorities without a prefix. */
     @Bean
     fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
         val authoritiesConverter = JwtGrantedAuthoritiesConverter()
@@ -42,5 +49,12 @@ class SecurityConfig {
         val converter = JwtAuthenticationConverter()
         converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter)
         return converter
+    }
+
+    companion object {
+        /** `hasRole('place_manager_user')` matches the authority as is; static so method security sees it early. */
+        @Bean
+        @JvmStatic
+        fun grantedAuthorityDefaults(): GrantedAuthorityDefaults = GrantedAuthorityDefaults("")
     }
 }

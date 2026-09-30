@@ -8,17 +8,15 @@ import java.util.UUID
 
 interface EventPlanPlaceInvitationRepository :
     JpaRepository<EventPlanPlaceInvitationEntity, EventPlanPlaceInvitationEntityId> {
-
     @Query(
-        "SELECT e FROM EventPlanPlaceInvitationEntity e " +
-            "WHERE e.id.place.id = :placeId",
+        "SELECT i FROM EventPlanPlaceInvitationEntity i JOIN FETCH i.id.eventPlan plan " +
+            "WHERE i.id.place.id = :placeId ORDER BY plan.startDateTime",
     )
     fun findAllByPlaceId(@Param("placeId") placeId: UUID): List<EventPlanPlaceInvitationEntity>
 
     @Query(
-        "SELECT e FROM EventPlanPlaceInvitationEntity e " +
-            "WHERE e.id.place.id = :placeId " +
-            "AND e.id.eventPlan.id = :eventPlanId",
+        "SELECT i FROM EventPlanPlaceInvitationEntity i " +
+            "WHERE i.id.place.id = :placeId AND i.id.eventPlan.id = :eventPlanId",
     )
     fun findByPlaceIdAndEventPlanId(
         @Param("placeId") placeId: UUID,

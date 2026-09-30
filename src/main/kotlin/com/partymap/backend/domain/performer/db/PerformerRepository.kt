@@ -7,7 +7,7 @@ import java.util.UUID
 interface PerformerRepository :
     JpaRepository<PerformerEntity, UUID>,
     JpaSpecificationExecutor<PerformerEntity> {
-
     fun findAllByLikedByUsersSub(sub: UUID): List<PerformerEntity>
+
     fun findAllByOwnerSub(sub: UUID): List<PerformerEntity>
 }

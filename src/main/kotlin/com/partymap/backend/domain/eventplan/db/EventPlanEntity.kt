@@ -15,46 +15,43 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import java.time.LocalDateTime
 
+/**
+ * An organizer's draft. It holds at most one place invitation and any number of lineup invitations; publishing turns
+ * it into an event and deletes it together with its invitations.
+ */
 @Entity
 class EventPlanEntity(
-    @Column
+    @Column(nullable = false)
     var title: String,
-
-    @Column
+    @Column(columnDefinition = "text", nullable = false)
     var description: String,
-
     @Column(nullable = false)
     var startDateTime: LocalDateTime,
-
     @Column(nullable = false)
     var endDateTime: LocalDateTime,
-
-    @Column(nullable = true)
+    @Column(length = 2048)
     var image: String?,
-
-    @Column(nullable = true)
     var price: String?,
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var kind: EventType,
-
     @ElementCollection
-    @CollectionTable(
-        name = "event_plan_links",
-        joinColumns = [JoinColumn(name = "event_plan_id")],
-    )
-    var links: MutableList<LinkEmbeddable> = mutableListOf(),
-
-    @OneToMany(cascade = [(CascadeType.ALL)], fetch = FetchType.EAGER)
-    var placeInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf(),
-
-    @OneToMany(cascade = [(CascadeType.ALL)], fetch = FetchType.EAGER)
-    var lineupInvitations: MutableList<EventPlanLineupInvitationEntity> = mutableListOf(),
-
+    @CollectionTable(name = "event_plan_links", joinColumns = [JoinColumn(name = "event_plan_id")])
+    var links: MutableList<LinkEmbeddable>,
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "owner_sub", nullable = false)
     var owner: UserEntity,
+) : BaseEntity() {
+    @OneToMany(mappedBy = "id.eventPlan", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var placeInvitations: MutableList<EventPlanPlaceInvitationEntity> = mutableListOf()
 
-) : BaseEntity()
+    @OneToMany(mappedBy = "id.eventPlan", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OrderBy("startTime")
+    var lineupInvitations: MutableList<EventPlanLineupInvitationEntity> = mutableListOf()
+
+    /** The single place invitation, if one was sent. */
+    val placeInvitation: EventPlanPlaceInvitationEntity? get() = placeInvitations.firstOrNull()
+}

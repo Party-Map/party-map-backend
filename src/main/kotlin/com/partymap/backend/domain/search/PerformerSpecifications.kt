@@ -1,29 +1,18 @@
 package com.partymap.backend.domain.search
 
 import com.partymap.backend.domain.performer.db.PerformerEntity
-import jakarta.persistence.criteria.Predicate
+import com.partymap.backend.domain.search.SearchUtils.contains
 import org.springframework.data.jpa.domain.Specification
 
 object PerformerSpecifications {
-
-    fun matchesQuery(rawQuery: String): Specification<PerformerEntity> {
-        val keywords = SearchUtils.prepareKeywords(rawQuery)
-        if (keywords.isEmpty()) {
-            return Specification { _, _, _ -> null }
-        }
-
-        return Specification { root, _, cb ->
-            val predicates = mutableListOf<Predicate>()
-
-            val nameExpr = root.get<String>("name")
-            val genreExpr = root.get<String>("genre")
-            val bioExpr = cb.coalesce(root.get("bio"), "")
-
-            predicates += SearchUtils.andKeywordsLike(cb, nameExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, genreExpr, keywords)
-            predicates += SearchUtils.andKeywordsLike(cb, bioExpr, keywords)
-
-            cb.or(*predicates.toTypedArray())
+    /** Name, genre or bio contains each keyword. */
+    fun matchesKeywords(keywords: List<String>): Specification<PerformerEntity> = Specification { root, _, cb ->
+        SearchUtils.everyKeywordMatches(cb, keywords) { keyword ->
+            listOf(
+                contains(cb, root.get("name"), keyword),
+                contains(cb, root.get("genre"), keyword),
+                contains(cb, root.get("bio"), keyword),
+            )
         }
     }
 }

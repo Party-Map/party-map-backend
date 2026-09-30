@@ -1,7 +1,11 @@
+-- Development seed, applied by Flyway after every migrate in the dev profile only (application-dev.yml adds
+-- classpath:db/seed to spring.flyway.locations; the dev profile also cleans the schema on start). The frontend's e2e
+-- tests and screenshot routes rely on these ids.
+
 -- ------------------------------------------------------------------
 -- Seed user (owner of all places / performers / events) -> user_entity
 -- ------------------------------------------------------------------
-INSERT INTO public.user_entity (sub, created_date, updated_date)
+INSERT INTO public.user_entity (sub, created_at, updated_at)
 VALUES ('3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now());
 
 -- ------------------------------------------------------------------
@@ -193,8 +197,6 @@ VALUES ('23c3c9fb-23e6-59d7-b317-dd614478e685', 'Sunset Sessions', '6375cdd9-b83
 -- Old: event_performers(event_id, performer_id)
 -- New:
 --   event_lineup_item_entity(event_id, performer_id, start_time, end_time)
---   performer_entity_lineup_items(lineup_items_event_id, lineup_items_performer_id, performer_entity_id)
--- We seed with NULL times.
 -- ------------------------------------------------------------------
 
 INSERT INTO public.event_lineup_item_entity (event_id, performer_id, start_time, end_time)
@@ -288,28 +290,7 @@ WHERE e.id = 'cd83795e-7909-5a5a-b60b-cd94cf20ae8c';
 
 
 
--- Mirror for performer_entity_lineup_items (unchanged)
-INSERT INTO public.performer_entity_lineup_items (lineup_items_event_id, lineup_items_performer_id, performer_entity_id)
-VALUES ('23c3c9fb-23e6-59d7-b317-dd614478e685', '04238ef3-0e2b-528d-b141-ab202c578afc',
-        '04238ef3-0e2b-528d-b141-ab202c578afc'),
-       ('adc3b4aa-ffe7-5cd2-b2e9-6bc06eceb2e2', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
-        '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'),
-       ('cd931a12-7697-588b-a6c4-603d2589f7aa', '04238ef3-0e2b-528d-b141-ab202c578afc',
-        '04238ef3-0e2b-528d-b141-ab202c578afc'),
-       ('cd931a12-7697-588b-a6c4-603d2589f7aa', '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c',
-        '0d19069c-1a50-5cbc-8e32-ea7e162f9b4c'),
-       ('ee3a5589-54fc-50f2-a9b0-60056cf59478', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
-        '54b88841-f7cc-53fc-8595-a89b8b11aa1c'),
-       ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '04238ef3-0e2b-528d-b141-ab202c578afc',
-        '04238ef3-0e2b-528d-b141-ab202c578afc'),
-       ('7862fe14-5a13-5df2-96e9-1d0f55eb671a', '54b88841-f7cc-53fc-8595-a89b8b11aa1c',
-        '54b88841-f7cc-53fc-8595-a89b8b11aa1c'),
-       ('f04864d6-cad9-5161-89d4-ede7a25d1efa', '0667375d-88a4-58ca-8ad1-785f2bdcf1ce',
-        '0667375d-88a4-58ca-8ad1-785f2bdcf1ce'),
-       ('fa4860b4-daf2-5dc8-b7b6-dd769ea9c363', '363ed242-4068-5d2b-8750-ea2ece66d59d',
-        '363ed242-4068-5d2b-8750-ea2ece66d59d'),
-       ('cd83795e-7909-5a5a-b60b-cd94cf20ae8c', 'c1d21f9e-f293-5275-96db-242842b09ed3',
-        'c1d21f9e-f293-5275-96db-242842b09ed3');
+
 
 
 INSERT INTO public.event_plan_entity (created_at, end_date_time, start_date_time, updated_at, id, owner_sub,
