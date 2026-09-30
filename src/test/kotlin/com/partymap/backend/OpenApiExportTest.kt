@@ -1,12 +1,12 @@
 package com.partymap.backend
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.databind.SerializationFeature
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
@@ -25,7 +25,7 @@ import java.nio.file.Path
 @Import(TestcontainersConfig::class)
 class OpenApiExportTest @Autowired constructor(
     private val mockMvc: MockMvc,
-    private val objectMapper: ObjectMapper,
+    private val objectMapper: JsonMapper,
 ) {
     @Test
     fun `serves the OpenAPI document for every controller and exports it`() {
@@ -35,7 +35,7 @@ class OpenApiExportTest @Autowired constructor(
 
         val document = objectMapper.readTree(body)
         assertTrue(document.path("openapi").asText().startsWith("3."))
-        val paths = document.path("paths").fieldNames().asSequence().toSet()
+        val paths = document.path("paths").propertyNames().toSet()
         val expected = setOf(
             "/api/events", "/api/events/{id}", "/api/events/upcoming-events",
             "/api/places", "/api/places/{id}", "/api/places/{id}/invitations",

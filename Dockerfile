@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # Build with the Gradle wrapper so Docker uses exactly the Gradle version the project pins.
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /workspace
 
 COPY gradlew build.gradle.kts settings.gradle.kts ./
@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew --no-daemon dependencies -
 COPY src ./src
 RUN --mount=type=cache,target=/root/.gradle ./gradlew --no-daemon clean bootJar
 
-FROM eclipse-temurin:21-jre-alpine AS runtime
+FROM eclipse-temurin:25-jre-alpine AS runtime
 WORKDIR /app
 COPY --from=build /workspace/build/libs/*.jar /app/app.jar
 EXPOSE 8080
