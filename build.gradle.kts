@@ -22,6 +22,9 @@ configurations {
     }
 }
 
+// 1.21.4 speaks the Docker Engine 29 API (the Boot 3.5.6 BOM ships 1.21.3, which is rejected as too old).
+extra["testcontainers.version"] = "1.21.4"
+
 repositories {
     mavenCentral()
 }
@@ -32,6 +35,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.9.1")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     runtimeOnly("org.postgresql:postgresql")
@@ -44,6 +48,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

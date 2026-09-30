@@ -12,6 +12,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://auth.terkep.party/realms/party-map
+springdoc:
+  api-docs:
+    # Under /api so the reverse proxy routes it with the rest of the API.
+    path: /api/openapi
+  default-produces-media-type: application/json
 server:
   forward-headers-strategy: native
   tomcat:

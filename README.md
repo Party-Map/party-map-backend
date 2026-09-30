@@ -36,8 +36,19 @@ The frontend runs from its own folder (`docker compose up` in `../party-map-fron
 ## Tests
 
 ```bash
-./gradlew test          # needs a reachable PostgreSQL, e.g. `docker compose up db`
+./gradlew test          # needs Docker running: Testcontainers starts a throwaway PostgreSQL
 ./gradlew clean build   # compile + tests + jar
+```
+
+Integration tests use the `test` profile and `TestcontainersConfig` (`@ActiveProfiles("test") @Import(TestcontainersConfig::class)`).
+
+## OpenAPI
+
+The running app serves its OpenAPI 3.1 document at `/api/openapi` (springdoc). `OpenApiExportTest` also writes it to
+`build/openapi.json`; the frontend generates its API types from a copy of that file:
+
+```bash
+./gradlew test --tests '*OpenApiExportTest*'   # then copy build/openapi.json to ../party-map-frontend/openapi.json
 ```
 
 HTTP smoke requests for IntelliJ's HTTP client are in `rest/`.

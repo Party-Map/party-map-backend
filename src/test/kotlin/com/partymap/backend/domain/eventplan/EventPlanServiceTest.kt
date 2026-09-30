@@ -1,5 +1,6 @@
 package com.partymap.backend.domain.eventplan
 
+import com.partymap.backend.TestcontainersConfig
 import com.partymap.backend.domain.common.db.GeoPointEmbeddable
 import com.partymap.backend.domain.event.db.EventRepository
 import com.partymap.backend.domain.event.db.EventType
@@ -23,10 +24,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 import java.time.LocalDateTime
 import java.util.*
 
 @SpringBootTest
+@ActiveProfiles("test")
+@Import(TestcontainersConfig::class)
 class EventPlanServiceTest {
     @Autowired
     lateinit var userRepository: UserRepository

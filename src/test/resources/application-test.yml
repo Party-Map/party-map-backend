@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  sql:
+    init:
+      mode: never
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Resolved lazily on the first bearer token; tests never send one to the real issuer.
+          issuer-uri: https://auth.terkep.party/realms/party-map
