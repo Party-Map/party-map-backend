@@ -22,6 +22,14 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://auth.terkep.party/realms/party-map
+app:
+  keycloak:
+    # The confidential client "partymap-backend" whose service account lists users and grants the manager roles.
+    admin:
+      base-url: ${APP_KEYCLOAK_ADMIN_URL:https://auth.terkep.party}
+      realm: party-map
+      client-id: partymap-backend
+      client-secret: ${APP_KEYCLOAK_ADMIN_CLIENT_SECRET:}
 springdoc:
   api-docs:
     # Under /api so the reverse proxy routes it with the rest of the API.

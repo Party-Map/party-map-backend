@@ -24,3 +24,10 @@ open class ConflictException(message: String) : ApiException(HttpStatus.CONFLICT
 fun requireOwner(ownerSub: UUID, callerSub: UUID, action: String) {
     if (ownerSub != callerSub) throw ForbiddenException("You are not allowed to $action.")
 }
+
+/** A service the API depends on (Keycloak) failed or is misconfigured; the message never carries its answer. */
+class UpstreamException(message: String, cause: Throwable? = null) : ApiException(HttpStatus.BAD_GATEWAY, message) {
+    init {
+        cause?.let(::initCause)
+    }
+}

@@ -1,6 +1,7 @@
 package com.partymap.backend.config
 
 import com.partymap.backend.domain.common.exception.NotFoundException
+import com.partymap.backend.domain.common.exception.UpstreamException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.core.MethodParameter
@@ -24,6 +25,18 @@ class RestExceptionHandlerTest {
 
         assertEquals(HttpStatus.NOT_FOUND.value(), problem.status)
         assertEquals("Place 1 was not found.", problem.detail)
+    }
+
+    @Test
+    fun `an upstream failure is a bad gateway that keeps its cause out of the answer`() {
+        val cause = IllegalStateException("secret upstream body")
+        val exception = UpstreamException("Keycloak did not answer as expected.", cause)
+
+        val problem = handler.handleApiException(exception)
+
+        assertEquals(HttpStatus.BAD_GATEWAY.value(), problem.status)
+        assertEquals("Keycloak did not answer as expected.", problem.detail)
+        assertEquals(cause, exception.cause)
     }
 
     @Test

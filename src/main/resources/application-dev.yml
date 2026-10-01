@@ -12,7 +12,13 @@ spring:
     clean-disabled: false
   security:
     oauth2:
-      resourceserver:
+      resourceapp:
+  keycloak:
+    admin:
+      # The dev Keycloak of docker-compose.yml; the secret is the one in keycloak/party-map-realm.json.
+      base-url: ${APP_KEYCLOAK_ADMIN_URL:http://localhost:8081}
+      client-secret: ${APP_KEYCLOAK_ADMIN_CLIENT_SECRET:partymap-backend-dev-secret}
+server:
         jwt:
           issuer-uri: https://auth.terkep.party/realms/party-map
 server:

@@ -81,6 +81,9 @@ services:
       # the signing keys are fetched over the Docker network.
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/party-map
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/party-map/protocol/openid-connect/certs
+      # The admin pages' service account (client "partymap-backend" in the dev realm).
+      APP_KEYCLOAK_ADMIN_URL: http://keycloak:8080
+      APP_KEYCLOAK_ADMIN_CLIENT_SECRET: partymap-backend-dev-secret
     ports:
       - "8080:8080"
     depends_on:
