@@ -12,3 +12,7 @@ app:
       # Integration tests use FakeKeycloakUsers; the real gateway is built but never called.
       base-url: http://keycloak.test
       client-secret: test-secret
+  shell:
+    # Integration tests use StaticShellTemplate; the fetcher is built but never called.
+    template-url: http://shell.test/index.html
+    public-base-url: http://localhost:3000

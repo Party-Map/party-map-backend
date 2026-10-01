@@ -46,6 +46,11 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
         )
         assertEquals(emptySet<String>(), expected - paths, "missing paths")
         assertFalse(paths.any { it.endsWith("/set-status") }, "the removed set-status endpoint is still documented")
+        // The HTML shells (/events/{id}, /sitemap.xml...) are pages, not API: springdoc only documents /api/**.
+        assertTrue(
+            paths.all { it.startsWith("/api/") },
+            "non-API paths documented: ${paths.filterNot { it.startsWith("/api/") }}",
+        )
         // Non-null Kotlin properties are required: the frontend's generated types depend on it.
         val placeRequired = document.path("components").path("schemas").path("PlaceDto").path("required")
             .values().map { it.asString() }.toSet()

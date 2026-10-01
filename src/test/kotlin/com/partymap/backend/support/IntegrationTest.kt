@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter
 
 /**
  * Base for tests that need the application context: a real Postgres (Testcontainers), the Flyway schema, MockMvc and an
- * in-memory Keycloak ([FakeKeycloakUsers]).
+ * in-memory Keycloak ([FakeKeycloakUsers]) and a static SPA template for the shells ([StaticShellTemplate]).
  *
  * Tests are deliberately not wrapped in a transaction: every request commits like in production, so lazy loading,
  * constraint and concurrency problems surface. The tables are emptied after each test instead.
@@ -25,7 +25,7 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestcontainersConfig::class, TestData::class, FakeKeycloakUsers::class)
+@Import(TestcontainersConfig::class, TestData::class, FakeKeycloakUsers::class, StaticShellTemplate::class)
 abstract class IntegrationTest {
     @Autowired
     protected lateinit var mockMvc: MockMvc

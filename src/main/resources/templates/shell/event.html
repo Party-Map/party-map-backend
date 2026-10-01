@@ -1,0 +1,15 @@
+<article class="pm-shell">
+    <h1 th:text="${title}">Event</h1>
+    <img th:if="${image != null}" th:src="${image}" th:alt="${title}" />
+    <p><time th:attr="datetime=${startIso}" th:text="${whenText}">when</time></p>
+    <p>
+        <address>
+            <a th:href="${placeUrl}" th:text="${placeName}">place</a>, <span th:text="${placeCity}">city</span>
+        </address>
+    </p>
+    <p th:text="${description}">description</p>
+    <p th:if="${price != null}" th:text="${price}">price</p>
+    <ol th:if="${!lineup.isEmpty()}">
+        <li th:each="item : ${lineup}"><a th:href="${item.url}" th:text="${item.name}">performer</a></li>
+    </ol>
+</article>

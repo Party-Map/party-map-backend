@@ -1,0 +1,16 @@
+<article class="pm-shell">
+    <h1 th:text="${name}">Place</h1>
+    <img th:if="${image != null}" th:src="${image}" th:alt="${name}" />
+    <p><address><span th:text="${address}">address</span>, <span th:text="${city}">city</span></address></p>
+    <p th:if="${description != null}" th:text="${description}">description</p>
+    <ul th:if="${!tags.isEmpty()}">
+        <li th:each="tag : ${tags}" th:text="${tag}">tag</li>
+    </ul>
+    <h2 th:if="${!events.isEmpty()}">Upcoming events</h2>
+    <ul th:if="${!events.isEmpty()}">
+        <li th:each="event : ${events}">
+            <a th:href="${event.url}" th:text="${event.title}">event</a>
+            <time th:attr="datetime=${event.startIso}" th:text="${event.whenText}">when</time>
+        </li>
+    </ul>
+</article>

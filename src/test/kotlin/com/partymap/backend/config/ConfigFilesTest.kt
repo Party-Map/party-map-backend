@@ -29,6 +29,10 @@ class ConfigFilesTest {
 
         assertEquals("\${APP_KEYCLOAK_ADMIN_URL:http://localhost:8081}", dev.getProperty("app.keycloak.admin.base-url"))
         assertEquals(
+            "\${APP_SHELL_TEMPLATE_URL:http://127.0.0.1:3000/index.html}",
+            dev.getProperty("app.shell.template-url"),
+        )
+        assertEquals(
             "https://auth.terkep.party/realms/party-map",
             dev.getProperty("spring.security.oauth2.resourceserver.jwt.issuer-uri"),
         )

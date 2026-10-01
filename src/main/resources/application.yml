@@ -30,10 +30,19 @@ app:
       realm: party-map
       client-id: partymap-backend
       client-secret: ${APP_KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  # The server-rendered shells of /events/{id}, /places/{id} and /performers/{id} (web/shell): the SPA's index.html
+  # is fetched from the frontend and enriched with the page's metadata, JSON-LD and data.
+  shell:
+    template-url: ${APP_SHELL_TEMPLATE_URL:http://frontend:8080/index.html}
+    public-base-url: ${APP_SHELL_PUBLIC_BASE_URL:https://terkep.party}
+    zone: Europe/Budapest
+    template-ttl: 60s
 springdoc:
   api-docs:
     # Under /api so the reverse proxy routes it with the rest of the API.
     path: /api/openapi
+  # The HTML shells are not part of the API the frontend generates its types from.
+  paths-to-match: /api/**
   default-produces-media-type: application/json
 server:
   forward-headers-strategy: native

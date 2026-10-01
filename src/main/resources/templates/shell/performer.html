@@ -1,0 +1,13 @@
+<article class="pm-shell">
+    <h1 th:text="${name}">Performer</h1>
+    <img th:if="${image != null}" th:src="${image}" th:alt="${name}" />
+    <p th:text="${genre}">genre</p>
+    <p th:text="${bio}">bio</p>
+    <h2 th:if="${!events.isEmpty()}">Upcoming shows</h2>
+    <ul th:if="${!events.isEmpty()}">
+        <li th:each="event : ${events}">
+            <a th:href="${event.url}" th:text="${event.title}">event</a>
+            <time th:attr="datetime=${event.startIso}" th:text="${event.whenText}">when</time>
+        </li>
+    </ul>
+</article>

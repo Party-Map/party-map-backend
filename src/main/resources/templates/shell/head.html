@@ -1,0 +1,15 @@
+<title th:text="${meta.title}">PartyMap</title>
+<meta name="description" th:content="${meta.description}" />
+<link th:if="${meta.canonical != null}" rel="canonical" th:href="${meta.canonical}" />
+<meta th:if="${meta.noindex}" name="robots" content="noindex" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="PartyMap" />
+<meta property="og:title" th:content="${meta.title}" />
+<meta property="og:description" th:content="${meta.description}" />
+<meta th:if="${meta.canonical != null}" property="og:url" th:content="${meta.canonical}" />
+<meta th:if="${meta.image != null}" property="og:image" th:content="${meta.image}" />
+<meta name="twitter:card" th:content="${meta.image != null} ? 'summary_large_image' : 'summary'" />
+<meta name="twitter:title" th:content="${meta.title}" />
+<meta name="twitter:description" th:content="${meta.description}" />
+<meta th:if="${meta.image != null}" name="twitter:image" th:content="${meta.image}" />
+<script th:if="${jsonLd != null}" type="application/ld+json" th:utext="${jsonLd}"></script>
