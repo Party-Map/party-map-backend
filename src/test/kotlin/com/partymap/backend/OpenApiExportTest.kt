@@ -40,6 +40,7 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
             "/api/performers", "/api/performers/{id}",
             "/api/event-plan", "/api/event-plan/{id}/publish",
             "/api/me/likes/events/{eventId}", "/api/search",
+            "/api/admin/users", "/api/admin/users/{id}", "/api/admin/users/{id}/roles/{role}",
         )
         assertEquals(emptySet<String>(), expected - paths, "missing paths")
         assertFalse(paths.any { it.endsWith("/set-status") }, "the removed set-status endpoint is still documented")
@@ -47,6 +48,16 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
         val placeRequired = document.path("components").path("schemas").path("PlaceDto").path("required")
             .values().map { it.asString() }.toSet()
         assertEquals(setOf("id", "name", "location", "address", "city", "tags", "links"), placeRequired)
+        val adminUserRequired = document.path("components").path("schemas").path("AdminUserDto").path("required")
+            .values().map { it.asString() }.toSet()
+        assertEquals(setOf("id", "username", "enabled", "roles"), adminUserRequired)
+        // The role path variable is documented as one of the manager roles, so the frontend gets a union type.
+        val roleParameter = document.path("paths").path("/api/admin/users/{id}/roles/{role}").path("put")
+            .path("parameters").values().first { it.path("name").asString() == "role" }
+        assertEquals(
+            setOf("event_organizer_user", "place_manager_user", "performer_manager_user"),
+            roleParameter.path("schema").path("enum").values().map { it.asString() }.toSet(),
+        )
 
         val out = Path.of("build", "openapi.json")
         Files.createDirectories(out.parent)

@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.method.annotation.HandlerMethodValidationException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 /**
@@ -40,6 +41,25 @@ class RestExceptionHandler : ResponseEntityExceptionHandler() {
         problem.setProperty(
             "errors",
             ex.bindingResult.fieldErrors.map { FieldProblem(it.field, it.defaultMessage ?: "is invalid") },
+        )
+        return handleExceptionInternal(ex, problem, headers, status, request)
+    }
+
+    /** Invalid query or path parameters (`@Min`, `@Max`...), listed by parameter name like the body's fields. */
+    override fun handleHandlerMethodValidationException(
+        ex: HandlerMethodValidationException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest,
+    ): ResponseEntity<Any>? {
+        val problem = ex.body
+        problem.detail = "Some parameters are invalid."
+        problem.setProperty(
+            "errors",
+            ex.parameterValidationResults.flatMap { result ->
+                val name = result.methodParameter.parameterName ?: "parameter"
+                result.resolvableErrors.map { FieldProblem(name, it.defaultMessage ?: "is invalid") }
+            },
         )
         return handleExceptionInternal(ex, problem, headers, status, request)
     }

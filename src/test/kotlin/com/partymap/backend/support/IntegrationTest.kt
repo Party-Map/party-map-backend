@@ -16,7 +16,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
- * Base for tests that need the application context: a real Postgres (Testcontainers), the Flyway schema and MockMvc.
+ * Base for tests that need the application context: a real Postgres (Testcontainers), the Flyway schema, MockMvc and an
+ * in-memory Keycloak ([FakeKeycloakUsers]).
  *
  * Tests are deliberately not wrapped in a transaction: every request commits like in production, so lazy loading,
  * constraint and concurrency problems surface. The tables are emptied after each test instead.
@@ -24,7 +25,7 @@ import java.time.format.DateTimeFormatter
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestcontainersConfig::class, TestData::class)
+@Import(TestcontainersConfig::class, TestData::class, FakeKeycloakUsers::class)
 abstract class IntegrationTest {
     @Autowired
     protected lateinit var mockMvc: MockMvc
@@ -38,8 +39,12 @@ abstract class IntegrationTest {
     @Autowired
     protected lateinit var jsonMapper: JsonMapper
 
+    @Autowired
+    protected lateinit var keycloak: FakeKeycloakUsers
+
     @AfterEach
     fun emptyTables() {
+        keycloak.reset()
         val tables = jdbc.queryForList(
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'flyway_schema_history'",
             String::class.java,
