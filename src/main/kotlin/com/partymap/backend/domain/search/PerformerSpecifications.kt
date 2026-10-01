@@ -15,4 +15,9 @@ object PerformerSpecifications {
             )
         }
     }
+
+    /** The genre equals [genre], ignoring case. */
+    fun genreIs(genre: String): Specification<PerformerEntity> = Specification { root, _, cb ->
+        cb.equal(cb.lower(root.get("genre")), genre.lowercase())
+    }
 }
