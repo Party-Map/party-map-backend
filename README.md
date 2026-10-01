@@ -19,7 +19,7 @@ schema with Flyway on every start and then loads the demo data from `src/main/re
 | Backend | http://localhost:8080/api/places | bearer token from Keycloak for protected endpoints |
 | OpenAPI document | http://localhost:8080/api/openapi | |
 | Keycloak admin console | http://localhost:8081 | admin / adminpass |
-| Keycloak dev users (realm `party-map`) | | e2e@partymap.local / e2e-password (all manager roles) |
+| Keycloak dev users (realm `party-map`) | | e2e@partymap.local / e2e-password (all manager roles and `partymap_admin`); roles-target@partymap.local (no roles, no password: the target of the admin e2e test) |
 | PostgreSQL | localhost:5432 | partymap / partymap |
 
 Rebuild after code changes with `docker compose up --build backend`. For hot reload, start only the dependencies and
@@ -61,6 +61,9 @@ Flyway owns the schema (`src/main/resources/db/migration`); Hibernate only valid
   404 unknown id, 409 state conflict (already invited, not publishable yet).
 - Mutations without a result answer 204. Creating or updating returns the saved object.
 - `GET /api/places?bbox=minLon,minLat,maxLon,maxLat` returns only the places inside the map viewport.
+- `/api/admin/**` is for the `partymap_admin` realm role only (reads included): `GET /api/admin/users?q=&page=&size=`
+  (size up to 50), `GET /api/admin/users/{id}`, `PUT` and `DELETE /api/admin/users/{id}/roles/{role}` for the three
+  manager roles (204, idempotent; any other role is 400). Users and roles live in Keycloak; a Keycloak failure is 502.
 
 ## OpenAPI
 
@@ -83,6 +86,17 @@ docker compose exec keycloak /opt/keycloak/bin/kc.sh export --dir /tmp/export --
 docker compose cp keycloak:/tmp/export/party-map-realm.json keycloak/party-map-realm.json
 ```
 
+### Admin service account
+
+The admin endpoints call Keycloak's Admin REST API as the service account of the confidential client
+`partymap-backend` (`app.keycloak.admin.*` in `application.yml`; env `APP_KEYCLOAK_ADMIN_URL`,
+`APP_KEYCLOAK_ADMIN_CLIENT_SECRET`). Its service account holds the `realm-management` client roles `view-users`,
+`query-users` and `manage-users`, nothing more (role ids are read from the user's role mappings, so `view-realm` is
+not needed). Without a secret the application starts and only the admin endpoints answer 502. The dev realm export
+contains the client with the secret `partymap-backend-dev-secret`, which the dev profile and `docker-compose.yml` use.
+
+The realm role `partymap_admin` (a composite of `user`) is granted in Keycloak only; the API never grants it.
+
 ## Production
 
 The `prod` profile allows CORS from `https://terkep.party`. The datasource comes from `SPRING_DATASOURCE_*` (or the
@@ -90,3 +104,15 @@ The `prod` profile allows CORS from `https://terkep.party`. The datasource comes
 CI (`.github/workflows/deploy.yml`) runs `./gradlew check` on every push and pull request and, on `main`, pushes
 `ghcr.io/party-map/party-map-backend` tagged `latest` and with the commit SHA. The image runs as a non-root user and
 reports its health through `/api/openapi`.
+
+### Enabling the admin endpoints in production (once, on https://auth.terkep.party, realm `party-map`)
+
+1. Realm roles: create `partymap_admin`, description "Party Map platform administrator", and add `user` as its
+   associated (composite) role.
+2. Clients: create `partymap-backend` (OpenID Connect, client authentication on, service accounts roles on; standard
+   flow, direct access grants and implicit flow off). Under "Service accounts roles" assign the `realm-management`
+   roles `view-users`, `query-users` and `manage-users`. Copy the secret from "Credentials".
+3. On the server: add `APP_KEYCLOAK_ADMIN_CLIENT_SECRET=<secret>` to the backend's environment in
+   `/root/partymap/app` (`APP_KEYCLOAK_ADMIN_URL` defaults to `https://auth.terkep.party`) and recreate the backend.
+4. Users: assign `partymap_admin` to the platform admin; they sign out and in again so the token carries it.
+5. Smoke test: `GET https://api.terkep.party/api/admin/users?size=1` with that user's token answers 200.
