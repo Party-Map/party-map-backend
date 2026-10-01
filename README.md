@@ -97,6 +97,20 @@ contains the client with the secret `partymap-backend-dev-secret`, which the dev
 
 The realm role `partymap_admin` (a composite of `user`) is granted in Keycloak only; the API never grants it.
 
+## Server-rendered shells (SEO)
+
+`/events/{id}`, `/places/{id}` and `/performers/{id}` are also HTML routes (`web/shell`): the backend fetches the
+frontend's `index.html` (`app.shell.template-url`, cached for `app.shell.template-ttl`, the last good copy kept on a
+failed refresh, `shell/fallback-index.html` before the first success) and replaces its three comment regions
+(`<!--pm:head-->`, `<!--pm:body-->`, `<!--pm:data-->`) with the page's `<title>`, description, canonical, Open Graph
+and Twitter tags, a schema.org JSON-LD graph (`Event` with `location`, `performer` and `offers`; `Place`;
+`MusicGroup`), a crawler-readable body and a `<script id="pm-data" type="application/json">` carrying exactly what
+the app's page hook would fetch, so React renders without a first request. Unknown ids answer the app's 404 shell
+with `noindex`; `/sitemap.xml` lists the places, performers and the events that have not ended. The frontend's
+nginx (and its dev server) proxies only those routes here; `springdoc.paths-to-match` keeps them out of the OpenAPI
+document. Production needs `APP_SHELL_TEMPLATE_URL=http://frontend:8080/index.html` and
+`APP_SHELL_PUBLIC_BASE_URL=https://terkep.party` in the backend's environment.
+
 ## Production
 
 The `prod` profile allows CORS from `https://terkep.party`. The datasource comes from `SPRING_DATASOURCE_*` (or the
