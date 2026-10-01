@@ -30,12 +30,13 @@ class KeycloakAdminRestGateway(
     private val users = "/admin/realms/{realm}/users"
 
     override fun search(query: String?, first: Int, max: Int): List<KeycloakUser> = call {
+        val search = infixSearch(query)
         client.get()
             .uri { uri ->
                 uri.path(users)
-                if (!query.isNullOrBlank()) uri.queryParam("search", "{search}")
+                if (search != null) uri.queryParam("search", "{search}")
                 uri.queryParam("first", first).queryParam("max", max).queryParam("briefRepresentation", true)
-                    .build(mapOf("realm" to properties.realm, "search" to query.orEmpty()))
+                    .build(mapOf("realm" to properties.realm, "search" to search.orEmpty()))
             }
             .authorized()
             .retrieve()
@@ -45,11 +46,12 @@ class KeycloakAdminRestGateway(
     }
 
     override fun count(query: String?): Long = call {
+        val search = infixSearch(query)
         client.get()
             .uri { uri ->
                 uri.path("$users/count")
-                if (!query.isNullOrBlank()) uri.queryParam("search", "{search}")
-                uri.build(mapOf("realm" to properties.realm, "search" to query.orEmpty()))
+                if (search != null) uri.queryParam("search", "{search}")
+                uri.build(mapOf("realm" to properties.realm, "search" to search.orEmpty()))
             }
             .authorized()
             .retrieve()
@@ -97,6 +99,13 @@ class KeycloakAdminRestGateway(
             .retrieve()
             .body<RoleRepresentation>() ?: throw unexpectedKeycloakAnswer()
     }.id.also { roleIds[role] = it }
+
+    /**
+     * Keycloak's `search` matches prefixes, `*term*` anywhere and `"term"` exactly; the admin pages always search
+     * anywhere, so typed wildcards and quotes are dropped. Null when nothing is left to search for.
+     */
+    private fun infixSearch(query: String?): String? =
+        query?.filterNot { it == '*' || it == '"' }?.trim()?.takeIf { it.isNotEmpty() }?.let { "*$it*" }
 
     private fun <S : RestClient.RequestHeadersSpec<S>> S.authorized(): S =
         header("Authorization", "Bearer ${token.value()}")

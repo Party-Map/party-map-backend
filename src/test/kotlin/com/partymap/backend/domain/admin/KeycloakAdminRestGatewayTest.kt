@@ -162,15 +162,29 @@ class KeycloakAdminRestGatewayTest {
     }
 
     @Test
-    fun `encodes the search text and counts with the same matcher`() {
+    fun `searches for the text anywhere in the fields, encoded, and counts with the same matcher`() {
+        // Keycloak matches prefixes unless the term is wrapped in *...*; "..." would mean an exact match.
         val gateway = gateway()
         expectToken()
-        server.expect { request -> assertTrue(request.uri.rawQuery.contains("search=a%26b%20c"), request.uri.rawQuery) }
-            .andRespond(json("[]"))
-        server.expect(requestTo("$usersUrl/count?search=a%26b%20c")).andRespond(json("0"))
+        server.expect { request ->
+            assertTrue(request.uri.rawQuery.contains("search=%2Aa%26b%20c%2A"), request.uri.rawQuery)
+        }.andRespond(json("[]"))
+        server.expect(requestTo("$usersUrl/count?search=%2Aa%26b%20c%2A")).andRespond(json("0"))
 
-        assertEquals(emptyList<KeycloakUser>(), gateway.search("a&b c", 0, 10))
+        assertEquals(emptyList<KeycloakUser>(), gateway.search(" a&b c ", 0, 10))
         assertEquals(0, gateway.count("a&b c"))
+        server.verify()
+    }
+
+    @Test
+    fun `typed wildcards and quotes do not change the kind of search`() {
+        val gateway = gateway()
+        expectToken()
+        server.expect(requestTo("$usersUrl/count?search=%2Aadr%2A")).andRespond(json("1"))
+        server.expect(requestTo("$usersUrl/count")).andRespond(json("9"))
+
+        assertEquals(1, gateway.count("\"*adr*\""))
+        assertEquals(9, gateway.count("**"))
         server.verify()
     }
 

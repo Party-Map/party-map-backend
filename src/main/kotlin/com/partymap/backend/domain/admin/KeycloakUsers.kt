@@ -20,7 +20,7 @@ data class KeycloakUser(
  * `UpstreamException` (502).
  */
 interface KeycloakUsers {
-    /** Users whose username, email, first or last name contains [query] (all users when blank), [first]-based page. */
+    /** Users whose username, email, first or last name contains [query] anywhere (all when blank), from [first] on. */
     fun search(query: String?, first: Int, max: Int): List<KeycloakUser>
 
     /** How many users [search] would find without paging. */
