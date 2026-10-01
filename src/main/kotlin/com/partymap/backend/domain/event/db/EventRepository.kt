@@ -1,5 +1,6 @@
 package com.partymap.backend.domain.event.db
 
+import com.partymap.backend.domain.browse.db.BrowseEventRepository
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
@@ -9,7 +10,8 @@ import java.util.UUID
 
 interface EventRepository :
     JpaRepository<EventEntity, UUID>,
-    JpaSpecificationExecutor<EventEntity> {
+    JpaSpecificationExecutor<EventEntity>,
+    BrowseEventRepository {
     fun findAllByPlaceIdOrderByStartAsc(placeId: UUID): List<EventEntity>
 
     @Query(

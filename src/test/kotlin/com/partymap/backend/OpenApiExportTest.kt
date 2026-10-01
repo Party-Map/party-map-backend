@@ -41,6 +41,8 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
             "/api/event-plan", "/api/event-plan/{id}/publish",
             "/api/me/likes/events/{eventId}", "/api/search",
             "/api/admin/users", "/api/admin/users/{id}", "/api/admin/users/{id}/roles/{role}",
+            "/api/browse/events", "/api/browse/places", "/api/browse/performers",
+            "/api/browse/place-tags", "/api/browse/performer-genres",
         )
         assertEquals(emptySet<String>(), expected - paths, "missing paths")
         assertFalse(paths.any { it.endsWith("/set-status") }, "the removed set-status endpoint is still documented")
@@ -51,6 +53,18 @@ class OpenApiExportTest @Autowired constructor(private val mockMvc: MockMvc, pri
         val adminUserRequired = document.path("components").path("schemas").path("AdminUserDto").path("required")
             .values().map { it.asString() }.toSet()
         assertEquals(setOf("id", "username", "enabled", "roles"), adminUserRequired)
+        // Browse rows: the image, price and distance are optional, the venue summary is not.
+        val browseEventRequired = document.path("components").path("schemas").path("BrowseEventItemDto")
+            .path("required").values().map { it.asString() }.toSet()
+        assertEquals(setOf("id", "title", "start", "end", "kind", "place"), browseEventRequired)
+        // Browse filters are documented as individual query parameters, not as one object.
+        val browseParameters = document.path("paths").path("/api/browse/events").path("get").path("parameters")
+            .values().map { it.path("name").asString() }.toSet()
+        assertTrue(
+            browseParameters.containsAll(
+                setOf("lat", "lon", "radiusKm", "from", "to", "kind", "q", "sort", "page", "size"),
+            ),
+        )
         // The role path variable is documented as one of the manager roles, so the frontend gets a union type.
         val roleParameter = document.path("paths").path("/api/admin/users/{id}/roles/{role}").path("put")
             .path("parameters").values().first { it.path("name").asString() == "role" }
