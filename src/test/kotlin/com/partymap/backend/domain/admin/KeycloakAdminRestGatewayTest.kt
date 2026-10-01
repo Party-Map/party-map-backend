@@ -11,7 +11,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.web.client.ExpectedCount
 import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.content
 import org.springframework.test.web.client.match.MockRestRequestMatchers.header
@@ -220,22 +219,56 @@ class KeycloakAdminRestGatewayTest {
     }
 
     @Test
-    fun `adds and removes realm roles with the role's id, resolving the id once`() {
+    fun `adds a realm role with the id Keycloak lists as available to the user`() {
+        // Reading /roles/{name} would need view-realm; the user's available roles only need manage-users.
         val gateway = gateway()
         expectToken()
-        server.expect(ExpectedCount.once(), requestTo("$base/admin/realms/party-map/roles/place_manager_user"))
-            .andRespond(json("""{"id":"role-1","name":"place_manager_user","composite":true}"""))
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm/available"))
+            .andRespond(json("""[{"id":"r0","name":"other"},{"id":"role-1","name":"place_manager_user"}]"""))
         server.expect(requestTo("$usersUrl/$userId/role-mappings/realm"))
             .andExpect(method(HttpMethod.POST))
             .andExpect(content().json("""[{"id":"role-1","name":"place_manager_user"}]"""))
             .andRespond(withStatus(HttpStatus.NO_CONTENT))
+
+        gateway.addRealmRole(userId, "place_manager_user")
+        server.verify()
+    }
+
+    @Test
+    fun `removes a realm role with the id of the user's mapping`() {
+        val gateway = gateway()
+        expectToken()
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm"))
+            .andExpect(method(HttpMethod.GET))
+            .andRespond(json("""[{"id":"role-1","name":"place_manager_user"}]"""))
         server.expect(requestTo("$usersUrl/$userId/role-mappings/realm"))
             .andExpect(method(HttpMethod.DELETE))
             .andExpect(content().json("""[{"id":"role-1","name":"place_manager_user"}]"""))
             .andRespond(withStatus(HttpStatus.NO_CONTENT))
 
-        gateway.addRealmRole(userId, "place_manager_user")
         gateway.removeRealmRole(userId, "place_manager_user")
+        server.verify()
+    }
+
+    @Test
+    fun `removing a role the user does not hold sends nothing`() {
+        val gateway = gateway()
+        expectToken()
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm")).andRespond(json("[]"))
+
+        gateway.removeRealmRole(userId, "place_manager_user")
+        server.verify()
+    }
+
+    @Test
+    fun `adding a role the user already holds sends nothing`() {
+        val gateway = gateway()
+        expectToken()
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm/available")).andRespond(json("[]"))
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm"))
+            .andRespond(json("""[{"id":"role-1","name":"place_manager_user"}]"""))
+
+        gateway.addRealmRole(userId, "place_manager_user")
         server.verify()
     }
 
@@ -243,12 +276,22 @@ class KeycloakAdminRestGatewayTest {
     fun `a role missing from the realm is a configuration problem, not a missing user`() {
         val gateway = gateway()
         expectToken()
-        server.expect(requestTo("$base/admin/realms/party-map/roles/place_manager_user"))
-            .andRespond(withStatus(HttpStatus.NOT_FOUND))
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm/available")).andRespond(json("[]"))
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm")).andRespond(json("[]"))
 
         val error = assertThrows<UpstreamException> { gateway.addRealmRole(userId, "place_manager_user") }
 
         assertEquals("The realm role place_manager_user does not exist in Keycloak.", error.message)
+    }
+
+    @Test
+    fun `role changes for an unknown user are not found`() {
+        val gateway = gateway()
+        expectToken()
+        server.expect(requestTo("$usersUrl/$userId/role-mappings/realm/available"))
+            .andRespond(withStatus(HttpStatus.NOT_FOUND))
+
+        assertThrows<NotFoundException> { gateway.addRealmRole(userId, "place_manager_user") }
     }
 
     @Test
@@ -302,11 +345,9 @@ class KeycloakAdminRestGatewayTest {
         expectToken()
         server.expect(requestTo("$usersUrl/$userId")).andRespond(withSuccess())
         server.expect(requestTo("$usersUrl/count")).andRespond(withSuccess())
-        server.expect(requestTo("$base/admin/realms/party-map/roles/user")).andRespond(withSuccess())
 
         assertThrows<UpstreamException> { gateway.get(userId) }
         assertThrows<UpstreamException> { gateway.count(null) }
-        assertThrows<UpstreamException> { gateway.addRealmRole(userId, "user") }
     }
 
     @Test

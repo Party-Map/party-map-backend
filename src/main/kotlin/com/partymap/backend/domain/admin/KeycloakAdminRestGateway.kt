@@ -13,12 +13,11 @@ import org.springframework.web.client.RestClientException
 import org.springframework.web.client.body
 import java.time.Clock
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * [KeycloakUsers] over Keycloak's Admin REST API, authenticated as the service account of the confidential client in
- * [KeycloakAdminProperties] ([KeycloakAccessToken]). The token is dropped when Keycloak rejects it; role ids are cached
- * for the life of the application.
+ * [KeycloakAdminProperties] ([KeycloakAccessToken]); the token is dropped when Keycloak rejects it. Needs only the
+ * `realm-management` roles `view-users`, `query-users` and `manage-users`.
  */
 class KeycloakAdminRestGateway(
     private val client: RestClient,
@@ -26,7 +25,6 @@ class KeycloakAdminRestGateway(
     clock: Clock,
 ) : KeycloakUsers {
     private val token = KeycloakAccessToken(client, properties, clock)
-    private val roleIds = ConcurrentHashMap<String, String>()
     private val users = "/admin/realms/{realm}/users"
 
     override fun search(query: String?, first: Int, max: Int): List<KeycloakUser> = call {
@@ -66,39 +64,47 @@ class KeycloakAdminRestGateway(
             ?.toUser() ?: throw unexpectedKeycloakAnswer()
     }
 
-    override fun realmRoles(id: UUID): Set<String> = call(onNotFound = { NotFoundException("User", id) }) {
-        client.get().uri("$users/{id}/role-mappings/realm", properties.realm, id)
-            .authorized()
-            .retrieve()
-            .body<List<RoleRepresentation>>()
-            .orEmpty()
-            .mapTo(mutableSetOf()) { it.name }
+    override fun realmRoles(id: UUID): Set<String> = roleMappings(id).mapTo(mutableSetOf()) { it.name }
+
+    /**
+     * The role's id comes from the roles Keycloak lists as available to the user: reading `/roles/{name}` would need
+     * `view-realm`, the user's role mappings only need the `manage-users` the service account has.
+     */
+    override fun addRealmRole(id: UUID, role: String) {
+        val mapping = roleMappings(id, available = true).firstOrNull { it.name == role }
+        if (mapping != null) {
+            changeRoleMapping(HttpMethod.POST, id, mapping)
+        } else if (role !in realmRoles(id)) {
+            throw UpstreamException("The realm role $role does not exist in Keycloak.")
+        }
     }
 
-    override fun addRealmRole(id: UUID, role: String) = changeRealmRole(HttpMethod.POST, id, role)
+    override fun removeRealmRole(id: UUID, role: String) {
+        roleMappings(id).firstOrNull { it.name == role }?.let { changeRoleMapping(HttpMethod.DELETE, id, it) }
+    }
 
-    override fun removeRealmRole(id: UUID, role: String) = changeRealmRole(HttpMethod.DELETE, id, role)
+    /** The realm roles mapped directly to the user, or with [available] the ones that could still be mapped. */
+    private fun roleMappings(id: UUID, available: Boolean = false): List<RoleRepresentation> {
+        val path = if (available) "$users/{id}/role-mappings/realm/available" else "$users/{id}/role-mappings/realm"
+        return call(onNotFound = { NotFoundException("User", id) }) {
+            client.get().uri(path, properties.realm, id)
+                .authorized()
+                .retrieve()
+                .body<List<RoleRepresentation>>()
+                .orEmpty()
+        }
+    }
 
-    private fun changeRealmRole(method: HttpMethod, id: UUID, role: String) {
-        val mapping = listOf(RoleRepresentation(roleId(role), role))
+    private fun changeRoleMapping(method: HttpMethod, id: UUID, role: RoleRepresentation) {
         call(onNotFound = { NotFoundException("User", id) }) {
             client.method(method).uri("$users/{id}/role-mappings/realm", properties.realm, id)
                 .authorized()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(mapping)
+                .body(listOf(role))
                 .retrieve()
                 .toBodilessEntity()
         }
     }
-
-    private fun roleId(role: String): String = roleIds[role] ?: call(
-        onNotFound = { UpstreamException("The realm role $role does not exist in Keycloak.") },
-    ) {
-        client.get().uri("/admin/realms/{realm}/roles/{role}", properties.realm, role)
-            .authorized()
-            .retrieve()
-            .body<RoleRepresentation>() ?: throw unexpectedKeycloakAnswer()
-    }.id.also { roleIds[role] = it }
 
     /**
      * Keycloak's `search` matches prefixes, `*term*` anywhere and `"term"` exactly; the admin pages always search
