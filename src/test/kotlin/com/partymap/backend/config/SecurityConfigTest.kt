@@ -1,6 +1,7 @@
 package com.partymap.backend.config
 
 import com.partymap.backend.support.IntegrationTest
+import com.partymap.backend.support.tokenFor
 import org.hamcrest.Matchers.startsWith
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -10,6 +11,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.util.UUID
 
 class SecurityConfigTest : IntegrationTest() {
     @Autowired
@@ -57,5 +59,26 @@ class SecurityConfigTest : IntegrationTest() {
             status { isNotFound() }
             jsonPath("$.status") { value(404) }
         }
+    }
+
+    @Test
+    fun `admin reads need a token although other reads are public`() {
+        mockMvc.get("/api/admin/users").andExpect {
+            status { isUnauthorized() }
+            header { string("WWW-Authenticate", startsWith("Bearer")) }
+        }
+    }
+
+    @Test
+    fun `admin paths are closed to managers without the platform admin role`() {
+        val managerRoles = Roles.MANAGER_ROLES.toTypedArray()
+        mockMvc.get("/api/admin/users") { with(tokenFor(UUID.randomUUID(), *managerRoles)) }
+            .andExpect { status { isForbidden() } }
+    }
+
+    @Test
+    fun `the platform admin is not one of the grantable manager roles`() {
+        assertTrue(Roles.PARTYMAP_ADMIN !in Roles.MANAGER_ROLES)
+        assertTrue(Roles.ADMIN_VISIBLE_ROLES.containsAll(Roles.MANAGER_ROLES + Roles.PARTYMAP_ADMIN))
     }
 }

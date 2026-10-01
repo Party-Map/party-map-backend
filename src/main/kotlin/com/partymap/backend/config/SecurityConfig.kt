@@ -14,8 +14,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain
 
 /**
- * Stateless bearer-token security. Reads are public except the caller's own data; every write needs a token, and the
- * role and ownership rules sit on the controller methods (`@PreAuthorize`) and in the services.
+ * Stateless bearer-token security. Reads are public except the caller's own data and the platform admin's paths; every
+ * write needs a token, and the role and ownership rules sit on the controller methods (`@PreAuthorize`) and in the
+ * services.
  */
 @Configuration
 @EnableWebSecurity
@@ -27,6 +28,8 @@ class SecurityConfig {
             authorizeHttpRequests {
                 authorize("/api/me/**", authenticated)
                 authorize("/api/*/liked-*", authenticated)
+                // Before the public GET rule: the admin reads (user lists) are not public.
+                authorize("/api/admin/**", hasAuthority(Roles.PARTYMAP_ADMIN))
                 authorize(HttpMethod.GET, "/**", permitAll)
                 authorize("/error", permitAll)
                 authorize(anyRequest, authenticated)
