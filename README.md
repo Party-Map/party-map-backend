@@ -61,6 +61,9 @@ Flyway owns the schema (`src/main/resources/db/migration`); Hibernate only valid
   404 unknown id, 409 state conflict (already invited, not publishable yet).
 - Mutations without a result answer 204. Creating or updating returns the saved object.
 - `GET /api/places?bbox=minLon,minLat,maxLon,maxLat` returns only the places inside the map viewport.
+- A place must lie inside Hungary (`domain/common/geo/Hungary.kt`, the country's outline in `resources/geo/hungary.json`,
+  the same file the frontend's basemap uses): creating or moving one beyond the border is 400. Events happen at places,
+  so they are inside too.
 - `/api/admin/**` is for the `partymap_admin` realm role only (reads included): `GET /api/admin/users?q=&page=&size=`
   (size up to 50), `GET /api/admin/users/{id}`, `PUT` and `DELETE /api/admin/users/{id}/roles/{role}` for the three
   manager roles (204, idempotent; any other role is 400). Users and roles live in Keycloak; a Keycloak failure is 502.

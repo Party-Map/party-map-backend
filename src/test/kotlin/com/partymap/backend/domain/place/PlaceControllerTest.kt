@@ -211,6 +211,36 @@ class PlaceControllerTest : IntegrationTest() {
         }
 
         @Test
+        fun `a place beyond the border is rejected`() {
+            mockMvc.post("/api/places") {
+                with(tokenFor(UUID.randomUUID(), Roles.PLACE_MANAGER))
+                json(placeBody(name = "Krakkói kirándulás", latitude = 50.0678, longitude = 19.9362))
+            }.andExpect {
+                status { isBadRequest() }
+                content { contentType(MediaType.APPLICATION_PROBLEM_JSON) }
+                jsonPath("$.detail") { value("The place must be inside Hungary") }
+            }
+            assertEquals(0, count("place_entity"))
+        }
+
+        @Test
+        fun `a place cannot be moved beyond the border`() {
+            val owner = data.user()
+            val place = data.place(owner)
+
+            mockMvc.put("/api/places/${place.id}") {
+                with(tokenFor(owner.sub, Roles.PLACE_MANAGER))
+                json(placeBody(name = "Wien", latitude = 48.2082, longitude = 16.3738))
+            }.andExpect {
+                status { isBadRequest() }
+                jsonPath("$.detail") { value("The place must be inside Hungary") }
+            }
+            val unchanged = places.findById(place.id!!).orElseThrow()
+            assertEquals("Akvárium Klub", unchanged.name)
+            assertEquals(47.4979, unchanged.location.latitude)
+        }
+
+        @Test
         fun `a body that is not JSON is a bad request`() {
             mockMvc.post("/api/places") {
                 with(tokenFor(UUID.randomUUID(), Roles.PLACE_MANAGER))

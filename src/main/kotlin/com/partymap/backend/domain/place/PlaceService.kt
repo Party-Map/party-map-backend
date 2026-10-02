@@ -1,7 +1,9 @@
 package com.partymap.backend.domain.place
 
+import com.partymap.backend.domain.common.exception.InvalidRequestException
 import com.partymap.backend.domain.common.exception.NotFoundException
 import com.partymap.backend.domain.common.exception.requireOwner
+import com.partymap.backend.domain.common.geo.Hungary
 import com.partymap.backend.domain.place.db.PlaceEntity
 import com.partymap.backend.domain.place.db.PlaceRepository
 import com.partymap.backend.domain.place.dto.PlaceAdminListItemDto
@@ -44,15 +46,25 @@ class PlaceService(private val placeRepository: PlaceRepository, private val use
     ).map { it.toAdminListItemDto() }
 
     @Transactional
-    fun create(sub: UUID, dto: PlaceCreateDto): PlaceDto =
-        placeRepository.save(dto.toEntity(userRepository.getReferenceById(sub))).toDto()
+    fun create(sub: UUID, dto: PlaceCreateDto): PlaceDto {
+        requireInHungary(dto)
+        return placeRepository.save(dto.toEntity(userRepository.getReferenceById(sub))).toDto()
+    }
 
     @Transactional
     fun update(sub: UUID, id: UUID, dto: PlaceCreateDto): PlaceDto {
         val place = find(id)
         requireOwner(place.owner.sub, sub, "edit this place")
+        requireInHungary(dto)
         place.updateFromDto(dto)
         return placeRepository.saveAndFlush(place).toDto()
+    }
+
+    /** The map covers Hungary only: a place (and so every event, which happens at a place) must lie inside it. */
+    private fun requireInHungary(dto: PlaceCreateDto) {
+        if (!Hungary.contains(dto.location.latitude, dto.location.longitude)) {
+            throw InvalidRequestException("The place must be inside Hungary")
+        }
     }
 
     private fun find(id: UUID): PlaceEntity = placeRepository.findById(
