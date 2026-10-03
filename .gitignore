@@ -59,3 +59,7 @@ replay_pid*
 
 # Keep the Gradle wrapper jar (the *.jar rule above must not swallow it)
 !gradle/wrapper/gradle-wrapper.jar
+
+# Keycloak provider jars copied in by ../party-map-keycloak-theme (pnpm dev:keycloak)
+/keycloak-providers/*
+!/keycloak-providers/.gitkeep

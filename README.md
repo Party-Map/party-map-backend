@@ -85,9 +85,22 @@ HTTP smoke requests for IntelliJ's HTTP client are in `rest/` (they expect the d
 only when the Keycloak database volume is empty. To refresh the file from a running stack:
 
 ```bash
-docker compose exec keycloak /opt/keycloak/bin/kc.sh export --dir /tmp/export --realm party-map --users realm_file
+# --http-management-port: the running server already holds 9000
+docker compose exec keycloak /opt/keycloak/bin/kc.sh export --dir /tmp/export --realm party-map --users realm_file \
+  --http-management-port 9001
 docker compose cp keycloak:/tmp/export/party-map-realm.json keycloak/party-map-realm.json
 ```
+
+### Login theme
+
+The realm's login theme is `partymap` (sign-in and sign-up pages designed like the app), built in
+`../party-map-keycloak-theme`. Its `pnpm dev:keycloak` builds the jar, copies it to `./keycloak-providers` (mounted as
+Keycloak's providers directory, git-ignored) and recreates the container. Without the jar Keycloak logs
+`Failed to find LOGIN theme partymap` and shows its stock pages; everything else works. The export also carries the
+settings the theme's pages rely on (applied by the theme's `scripts/configure-realm.sh`): password policy
+`length(8) and notEmail`, `firstName` labelled "Display name" (required, 1-40 characters), `lastName` optional, and the
+"Terms and conditions" step required in the registration flow (the privacy-notice checkbox). `PM_APP_URL` in
+`docker-compose.yml` is where the pages' "Back to PartyMap" and privacy links lead.
 
 ### Admin service account
 
