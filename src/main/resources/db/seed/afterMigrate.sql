@@ -56,13 +56,34 @@ VALUES ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'Danube Club', 47.5005, 19.0481,
        ('9f1532a9-8b89-5142-a386-147585e1ba33', 'Poldi Bácsi Sörözö', 47.4408014178659, 19.02280223577477,
         'Ady Endre út 95', 'Budapest', 'Cozy local pub for socializing and late-night sessions.',
         'https://images.unsplash.com/photo-1510626176961-4b57d4fbad03?auto=format&fit=crop&w=1280&q=80',
+        '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
+       -- Four places at the country's edges for the map's border cases (frontend e2e/map.spec.ts).
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c11', 'Határ Csárda', 46.8692, 16.1312, 'Fő út 1', 'Felsőszölnök',
+        'Country inn at the westernmost village, folk nights by the stove.',
+        'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=1280&auto=format&fit=crop',
+        '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c12', 'Beremend Pince', 45.7917, 18.4317, 'Szabadság tér 2', 'Beremend',
+        'Wine cellar bar at the southern border, acoustic sessions on weekends.',
+        'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?q=80&w=1280&auto=format&fit=crop',
+        '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c13', 'Garbolc Tanya', 47.9453, 22.8699, 'Tanya 3', 'Garbolc',
+        'Farmstead stage at the easternmost village, open-air gigs in summer.',
+        'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?q=80&w=1280&auto=format&fit=crop',
+        '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c14', 'Hollóházi Kúria', 48.5397, 21.4106, 'Kastély út 4', 'Hollóháza',
+        'Manor house at the northern border with a ballroom for late nights.',
+        'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?q=80&w=1280&auto=format&fit=crop',
         '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now());
 
 -- ------------------------------------------------------------------
 -- Place tags -> place_tags (tags column)
 -- ------------------------------------------------------------------
 INSERT INTO public.place_tags (place_id, tags)
-VALUES ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'house'),
+VALUES ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c11', 'folk'),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c12', 'wine'),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c13', 'open air'),
+       ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c14', 'ballroom'),
+       ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'house'),
        ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'techno'),
        ('6375cdd9-b837-5ac9-a4d6-ae200d4e6059', 'rooftop'),
        ('d74d2042-627b-55fc-a36e-25cf5bebaf19', 'ruin bar'),
@@ -133,7 +154,12 @@ VALUES ('04238ef3-0e2b-528d-b141-ab202c578afc', 'INSTAGRAM', 'https://instagram.
 -- ------------------------------------------------------------------
 INSERT INTO public.event_entity (id, title, place_id, description, start_time, end_time, image, price, kind, owner_id,
                                  created_at, updated_at)
-VALUES ('23c3c9fb-23e6-59d7-b317-dd614478e685', 'Sunset Sessions', '6375cdd9-b837-5ac9-a4d6-ae200d4e6059',
+VALUES ('b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0e01', 'Border Beats', 'b0a1e5c2-7f3d-5a1e-9c2b-1d4f6e8a0c14',
+        'Techno in the manor house ballroom, five kilometres from the border.', now() + interval '4 days',
+        now() + interval '4 days 6 hours',
+        'https://images.unsplash.com/photo-1487180144351-b8472da7d491?q=80&w=1280&auto=format&fit=crop', 'HUF 3000',
+        'TECHNO', '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
+       ('23c3c9fb-23e6-59d7-b317-dd614478e685', 'Sunset Sessions', '6375cdd9-b837-5ac9-a4d6-ae200d4e6059',
         'Open-air evening by the river with melodic vibes.', now() + interval '1 day', now() + interval '2 days',
         'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=1280&auto=format&fit=crop', '€15', 'DISCO',
         '3241fc43-0124-48ae-8850-eb5ac64559c6', now(), now()),
